@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { CustomerTokenPayload, StaffTokenPayload, verifyToken } from "../lib/jwt";
+import { AdminTokenPayload, CustomerTokenPayload, StaffTokenPayload, verifyToken } from "../lib/jwt";
 
 declare global {
   namespace Express {
     interface Request {
-      auth?: CustomerTokenPayload | StaffTokenPayload;
+      auth?: CustomerTokenPayload | StaffTokenPayload | AdminTokenPayload;
     }
   }
 }
@@ -43,6 +43,26 @@ export function requireStaff(req: Request, res: Response, next: NextFunction) {
   requireAuth(req, res, () => {
     if (req.auth?.role !== "STAFF") {
       res.status(403).json({ error: "Staff access required" });
+      return;
+    }
+    next();
+  });
+}
+
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  requireAuth(req, res, () => {
+    if (req.auth?.role !== "ADMIN") {
+      res.status(403).json({ error: "Admin access required" });
+      return;
+    }
+    next();
+  });
+}
+
+export function requireFullAdmin(req: Request, res: Response, next: NextFunction) {
+  requireAuth(req, res, () => {
+    if (req.auth?.role !== "ADMIN" || req.auth.level !== "full") {
+      res.status(403).json({ error: "Full admin access required" });
       return;
     }
     next();

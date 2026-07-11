@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -27,6 +27,7 @@ model Customer {
   email        String   @unique
   passwordHash String
   coinBalance  Int      @default(0)
+  active       Boolean  @default(true)
   createdAt    DateTime @default(now())
 
   claimedSales CoinTransaction[]
@@ -57,7 +58,7 @@ model SaleCode {
   id                  String         @id @default(cuid())
   token               String         @unique
   locationId          String
-  staffUserId         String
+  staffUserId         String?
   amountCents         Int
   coinsAwarded        Int
   status              SaleCodeStatus @default(PENDING)
@@ -66,9 +67,9 @@ model SaleCode {
   claimedByCustomerId String?
   createdAt           DateTime       @default(now())
 
-  location  Location  @relation(fields: [locationId], references: [id])
-  staffUser StaffUser @relation(fields: [staffUserId], references: [id])
-  claimedBy Customer? @relation(fields: [claimedByCustomerId], references: [id])
+  location  Location   @relation(fields: [locationId], references: [id])
+  staffUser StaffUser? @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+  claimedBy Customer?  @relation(fields: [claimedByCustomerId], references: [id], onDelete: SetNull)
 
   transaction CoinTransaction?
 
@@ -107,9 +108,9 @@ model Redemption {
   fulfilledAtLocationId  String?
   createdAt              DateTime         @default(now())
 
-  customer            Customer   @relation(fields: [customerId], references: [id])
+  customer            Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
   reward              Reward     @relation(fields: [rewardId], references: [id])
-  fulfilledByStaff    StaffUser? @relation(fields: [fulfilledByStaffId], references: [id])
+  fulfilledByStaff    StaffUser? @relation(fields: [fulfilledByStaffId], references: [id], onDelete: SetNull)
   fulfilledAtLocation Location?  @relation(fields: [fulfilledAtLocationId], references: [id])
 
   transactions CoinTransaction[]
@@ -133,7 +134,7 @@ model CoinTransaction {
   relatedRedemptionId String?
   createdAt         DateTime            @default(now())
 
-  customer         Customer    @relation(fields: [customerId], references: [id])
+  customer         Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
   location         Location?   @relation(fields: [locationId], references: [id])
   relatedSaleCode  SaleCode?   @relation(fields: [relatedSaleCodeId], references: [id])
   relatedRedemption Redemption? @relation(fields: [relatedRedemptionId], references: [id])

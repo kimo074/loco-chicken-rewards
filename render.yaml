@@ -1,0 +1,26 @@
+services:
+  - name: loco-chicken-backend
+    type: web
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma migrate deploy && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: LIMITED_ADMIN_PASSWORD
+        sync: false
+
+  - name: loco-chicken-web
+    type: web
+    runtime: static
+    rootDir: mobile
+    buildCommand: npm install && npm run build:web
+    staticPublishPath: dist
+    envVars:
+      - key: EXPO_PUBLIC_API_URL
+        sync: false

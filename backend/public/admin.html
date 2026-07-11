@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Loco Chicken — Admin</title>
+<style>
+  :root {
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --border: #e8e1d8;
+    --text: #201a14;
+    --text-secondary: #6b6156;
+    --accent: #e85d2e;
+    --accent-ink: #ffffff;
+    --mono-bg: #f2ece3;
+    --good: #2a8a4a;
+    --bad: #c4392b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161310;
+      --surface: #201b16;
+      --border: #352e26;
+      --text: #f5efe6;
+      --text-secondary: #a89d8f;
+      --accent: #ff7a45;
+      --accent-ink: #1a0f08;
+      --mono-bg: #2a231c;
+      --good: #4cbf74;
+      --bad: #ff6b57;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  header h1 {
+    font-size: 20px;
+    margin: 0;
+    font-weight: 700;
+  }
+  header .sub {
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+  #logout {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  main {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 28px 32px 64px;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stat-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+  .stat-card .value {
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-card .sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .board-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 800px) {
+    .board-row { grid-template-columns: 1fr; }
+  }
+  .rank-cell {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    width: 24px;
+  }
+  .bar-track {
+    background: var(--mono-bg);
+    border-radius: 6px;
+    height: 6px;
+    width: 100px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    background: var(--accent);
+    height: 100%;
+    border-radius: 6px;
+  }
+  .name-with-bar { display: flex; flex-direction: column; gap: 4px; }
+  section {
+    margin-bottom: 44px;
+  }
+  section h2 {
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin: 0 0 14px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 14px;
+  }
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  tr:last-child td { border-bottom: none; }
+  .balance { font-variant-numeric: tabular-nums; }
+  .actions-cell { display: flex; gap: 8px; }
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pill.active { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
+  .pill.inactive { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--mono-bg);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn.danger { color: var(--bad); }
+  .btn.danger:hover { border-color: var(--bad); }
+  .btn.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+  .empty {
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 16px;
+  }
+  .coin-form { display: flex; gap: 6px; align-items: center; }
+  .coin-form input {
+    width: 64px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--mono-bg);
+    color: var(--text);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Add-record forms */
+  .add-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .add-form .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .add-form label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+  }
+  .add-form input, .add-form select {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--mono-bg);
+    color: var(--text);
+    font-size: 13px;
+    min-width: 140px;
+  }
+  .add-form .field.grow input { min-width: 200px; }
+  .form-error {
+    color: var(--bad);
+    font-size: 13px;
+    width: 100%;
+  }
+
+  /* Login gate */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .login-card h1 {
+    font-size: 18px;
+    margin: 0 0 4px;
+  }
+  .login-card p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin: 0 0 20px;
+  }
+  .login-card input {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--mono-bg);
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .login-card button {
+    width: 100%;
+    padding: 11px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .login-error {
+    color: var(--bad);
+    font-size: 13px;
+    margin: -4px 0 12px;
+    min-height: 16px;
+  }
+  #app { display: none; }
+  .level-badge {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--mono-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  #app.limited .add-form,
+  #app.limited .btn.danger,
+  #app.limited [data-action="edit"] {
+    display: none;
+  }
+  #app.limited .coin-form { display: none; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Loco Chicken Admin</h1>
+    <p>Enter the admin password to continue.</p>
+    <input id="password-input" type="password" placeholder="Password" autocomplete="current-password" />
+    <div class="login-error" id="login-error"></div>
+    <button id="login-btn">Log in</button>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div>
+      <h1>Loco Chicken Admin</h1>
+      <div class="sub">Customers, staff &amp; locations</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="level-badge" id="level-badge"></span>
+      <button id="logout">Log out</button>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>Analytics</h2>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="board-row">
+        <div>
+          <h2>Top Customers</h2>
+          <div class="table-wrap">
+            <table id="top-customers-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="empty" id="top-customers-empty" style="display:none">No customers yet.</div>
+        </div>
+        <div>
+          <h2>Staff Leaderboard</h2>
+          <div class="table-wrap">
+            <table id="staff-leaderboard-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Staff</th>
+                  <th>Sales</th>
+                  <th>Revenue</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="empty" id="staff-leaderboard-empty" style="display:none">No sales yet.</div>
+        </div>
+      </div>
+      <h2 style="margin-top:20px;">Location Performance</h2>
+      <div class="table-wrap">
+        <table id="location-performance-table">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Active staff</th>
+              <th>Sales</th>
+              <th>Revenue</th>
+              <th>Coins awarded</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="location-performance-empty" style="display:none">No locations yet.</div>
+    </section>
+
+    <section>
+      <h2>Locations</h2>
+      <form class="add-form" id="location-form">
+        <div class="field grow">
+          <label>Name</label>
+          <input id="location-name" placeholder="Loco Chicken - North" required />
+        </div>
+        <div class="field grow">
+          <label>Address</label>
+          <input id="location-address" placeholder="Street, city" required />
+        </div>
+        <button class="btn primary" type="submit">Add location</button>
+        <div class="form-error" id="location-form-error"></div>
+      </form>
+      <div class="table-wrap">
+        <table id="locations-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="locations-empty" style="display:none">No locations yet.</div>
+    </section>
+
+    <section>
+      <h2>Customers</h2>
+      <form class="add-form" id="customer-form">
+        <div class="field">
+          <label>Name</label>
+          <input id="customer-name" placeholder="Jane Doe" required />
+        </div>
+        <div class="field grow">
+          <label>Email</label>
+          <input id="customer-email" type="email" placeholder="jane@example.com" required />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input id="customer-password" type="text" placeholder="min. 8 characters" required />
+        </div>
+        <div class="field">
+          <label>Starting coins</label>
+          <input id="customer-coins" type="number" min="0" value="0" />
+        </div>
+        <button class="btn primary" type="submit">Add customer</button>
+        <div class="form-error" id="customer-form-error"></div>
+      </form>
+      <div class="table-wrap">
+        <table id="customers-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Balance</th>
+              <th>Adjust coins</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="customers-empty" style="display:none">No customers yet.</div>
+    </section>
+
+    <section>
+      <h2>Staff</h2>
+      <form class="add-form" id="staff-form">
+        <div class="field">
+          <label>Name</label>
+          <input id="staff-name" placeholder="Jordan" required />
+        </div>
+        <div class="field">
+          <label>PIN</label>
+          <input id="staff-pin" type="text" inputmode="numeric" placeholder="4-6 digits" required />
+        </div>
+        <div class="field">
+          <label>Location</label>
+          <select id="staff-location" required></select>
+        </div>
+        <button class="btn primary" type="submit">Add staff</button>
+        <div class="form-error" id="staff-form-error"></div>
+      </form>
+      <div class="table-wrap">
+        <table id="staff-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="staff-empty" style="display:none">No staff yet.</div>
+    </section>
+  </main>
+</div>
+
+<script>
+  const TOKEN_KEY = "loco_admin_token";
+  const LEVEL_KEY = "loco_admin_level";
+
+  const loginScreen = document.getElementById("login-screen");
+  const app = document.getElementById("app");
+  const passwordInput = document.getElementById("password-input");
+  const loginBtn = document.getElementById("login-btn");
+  const loginError = document.getElementById("login-error");
+  const logoutBtn = document.getElementById("logout");
+  const levelBadge = document.getElementById("level-badge");
+
+  function getToken() {
+    return localStorage.getItem(TOKEN_KEY);
+  }
+  function setSession(token, level) {
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(LEVEL_KEY, level);
+  }
+  function clearToken() {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(LEVEL_KEY);
+  }
+
+  async function apiFetch(path, options = {}) {
+    const res = await fetch(path, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + getToken(),
+        ...(options.headers || {}),
+      },
+    });
+    if (res.status === 401) {
+      clearToken();
+      showLogin();
+      throw new Error("Session expired");
+    }
+    if (res.status === 204) return {};
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Request failed");
+    return data;
+  }
+
+  function showLogin() {
+    loginScreen.style.display = "flex";
+    app.style.display = "none";
+  }
+
+  function showApp() {
+    loginScreen.style.display = "none";
+    app.style.display = "block";
+    const level = localStorage.getItem(LEVEL_KEY);
+    app.classList.toggle("limited", level === "limited");
+    levelBadge.textContent = level === "limited" ? "Limited access" : "Full access";
+    loadAnalytics();
+    loadLocations();
+    loadCustomers();
+    loadStaff();
+  }
+
+  async function doLogin() {
+    loginError.textContent = "";
+    const password = passwordInput.value;
+    if (!password) return;
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Login failed");
+      setSession(data.token, data.level);
+      passwordInput.value = "";
+      showApp();
+    } catch (err) {
+      loginError.textContent = err.message;
+    }
+  }
+
+  loginBtn.addEventListener("click", doLogin);
+  passwordInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doLogin();
+  });
+  logoutBtn.addEventListener("click", () => {
+    clearToken();
+    showLogin();
+  });
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function formatCents(cents) {
+    return "€" + (cents / 100).toFixed(2);
+  }
+
+  // ---------- Analytics ----------
+
+  async function loadAnalytics() {
+    try {
+      const data = await apiFetch("/api/admin/analytics");
+      renderStatCards(data.overview);
+      renderTopCustomers(data.topCustomers);
+      renderStaffLeaderboard(data.staffLeaderboard);
+      renderLocationPerformance(data.locationPerformance);
+    } catch (err) {
+      if (err.message !== "Session expired") alert("Could not load analytics: " + err.message);
+    }
+  }
+
+  function renderStatCards(o) {
+    const grid = document.getElementById("stat-grid");
+    const cards = [
+      { label: "Customers", value: o.totalCustomers, sub: `${o.activeCustomers} active` },
+      { label: "Staff", value: o.totalStaff, sub: `${o.activeStaff} active` },
+      { label: "Locations", value: o.totalLocations, sub: `${o.activeLocations} active` },
+      { label: "Coins outstanding", value: o.coinsOutstanding.toLocaleString(), sub: "owed to customers" },
+      { label: "Coins earned (all-time)", value: o.coinsEverEarned.toLocaleString() },
+      { label: "Coins redeemed (all-time)", value: o.coinsEverRedeemed.toLocaleString() },
+      { label: "Revenue processed", value: formatCents(o.totalRevenueCents), sub: `${o.salesClaimed} sales` },
+      { label: "Redemptions fulfilled", value: o.redemptionsFulfilled },
+      { label: "New signups", value: o.signupsLast7d, sub: `${o.signupsLast30d} in last 30d` },
+    ];
+    grid.innerHTML = cards
+      .map(
+        (c) => `
+        <div class="stat-card">
+          <div class="label">${c.label}</div>
+          <div class="value">${c.value}</div>
+          ${c.sub ? `<div class="sub">${c.sub}</div>` : ""}
+        </div>
+      `
+      )
+      .join("");
+  }
+
+  function renderTopCustomers(customers) {
+    const tbody = document.querySelector("#top-customers-table tbody");
+    const empty = document.getElementById("top-customers-empty");
+    empty.style.display = customers.length === 0 ? "block" : "none";
+    tbody.innerHTML = customers
+      .map(
+        (c, i) => `
+        <tr>
+          <td class="rank-cell">${i + 1}</td>
+          <td>${escapeHtml(c.name)}${c.active ? "" : ' <span class="pill inactive">Deactivated</span>'}</td>
+          <td class="balance">${c.coinBalance}</td>
+        </tr>
+      `
+      )
+      .join("");
+  }
+
+  function renderStaffLeaderboard(staff) {
+    const tbody = document.querySelector("#staff-leaderboard-table tbody");
+    const empty = document.getElementById("staff-leaderboard-empty");
+    empty.style.display = staff.length === 0 ? "block" : "none";
+    const maxSales = Math.max(1, ...staff.map((s) => s.salesCount));
+    tbody.innerHTML = staff
+      .map(
+        (s, i) => `
+        <tr>
+          <td class="rank-cell">${i + 1}</td>
+          <td>
+            <div class="name-with-bar">
+              <span>${escapeHtml(s.name)} <span style="color:var(--text-secondary); font-size:12px;">&middot; ${escapeHtml(s.locationName)}</span></span>
+              <div class="bar-track"><div class="bar-fill" style="width:${(s.salesCount / maxSales) * 100}%"></div></div>
+            </div>
+          </td>
+          <td class="balance">${s.salesCount}</td>
+          <td class="balance">${formatCents(s.totalAmountCents)}</td>
+        </tr>
+      `
+      )
+      .join("");
+  }
+
+  function renderLocationPerformance(locations) {
+    const tbody = document.querySelector("#location-performance-table tbody");
+    const empty = document.getElementById("location-performance-empty");
+    empty.style.display = locations.length === 0 ? "block" : "none";
+    tbody.innerHTML = locations
+      .map(
+        (l) => `
+        <tr>
+          <td>${escapeHtml(l.name)}${l.active ? "" : ' <span class="pill inactive">Deactivated</span>'}</td>
+          <td class="balance">${l.activeStaffCount}</td>
+          <td class="balance">${l.salesCount}</td>
+          <td class="balance">${formatCents(l.totalAmountCents)}</td>
+          <td class="balance">${l.coinsAwarded}</td>
+        </tr>
+      `
+      )
+      .join("");
+  }
+
+  // ---------- Locations ----------
+
+  let locationsCache = [];
+
+  async function loadLocations() {
+    const tbody = document.querySelector("#locations-table tbody");
+    const empty = document.getElementById("locations-empty");
+    try {
+      const { locations } = await apiFetch("/api/admin/locations");
+      locationsCache = locations;
+      populateLocationSelect(locations);
+
+      tbody.innerHTML = "";
+      empty.style.display = locations.length === 0 ? "block" : "none";
+      for (const loc of locations) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(loc.name)}</td>
+          <td>${escapeHtml(loc.address)}</td>
+          <td><span class="pill ${loc.active ? "active" : "inactive"}">${loc.active ? "Active" : "Deactivated"}</span></td>
+          <td class="actions-cell">
+            <button class="btn" data-action="edit" data-id="${loc.id}">Edit</button>
+            <button class="btn" data-action="toggle" data-id="${loc.id}" data-active="${loc.active}">${loc.active ? "Deactivate" : "Activate"}</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      tbody.querySelectorAll('[data-action="toggle"]').forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          btn.disabled = true;
+          try {
+            await apiFetch(`/api/admin/locations/${btn.dataset.id}/active`, {
+              method: "PATCH",
+              body: JSON.stringify({ active: btn.dataset.active !== "true" }),
+            });
+            loadLocations();
+          } catch (err) {
+            alert(err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+      tbody.querySelectorAll('[data-action="edit"]').forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const loc = locationsCache.find((l) => l.id === btn.dataset.id);
+          if (!loc) return;
+          const name = prompt("Location name", loc.name);
+          if (name === null) return;
+          const address = prompt("Address", loc.address);
+          if (address === null) return;
+          try {
+            await apiFetch(`/api/admin/locations/${loc.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ name, address }),
+            });
+            loadLocations();
+          } catch (err) {
+            alert(err.message);
+          }
+        });
+      });
+    } catch (err) {
+      if (err.message !== "Session expired") alert("Could not load locations: " + err.message);
+    }
+  }
+
+  function populateLocationSelect(locations) {
+    const select = document.getElementById("staff-location");
+    const current = select.value;
+    select.innerHTML = "";
+    for (const loc of locations.filter((l) => l.active)) {
+      const opt = document.createElement("option");
+      opt.value = loc.id;
+      opt.textContent = loc.name;
+      select.appendChild(opt);
+    }
+    if (current) select.value = current;
+  }
+
+  document.getElementById("location-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("location-form-error");
+    errorEl.textContent = "";
+    const name = document.getElementById("location-name").value.trim();
+    const address = document.getElementById("location-address").value.trim();
+    try {
+      await apiFetch("/api/admin/locations", {
+        method: "POST",
+        body: JSON.stringify({ name, address }),
+      });
+      document.getElementById("location-form").reset();
+      loadLocations();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  });
+
+  // ---------- Customers ----------
+
+  async function loadCustomers() {
+    const tbody = document.querySelector("#customers-table tbody");
+    const empty = document.getElementById("customers-empty");
+    try {
+      const { customers } = await apiFetch("/api/admin/customers");
+      tbody.innerHTML = "";
+      empty.style.display = customers.length === 0 ? "block" : "none";
+      for (const c of customers) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(c.name)}</td>
+          <td>${escapeHtml(c.email)}</td>
+          <td class="balance">${c.coinBalance}</td>
+          <td>
+            <form class="coin-form" data-id="${c.id}">
+              <input type="number" placeholder="&plusmn;amount" required />
+              <button class="btn" type="submit">Apply</button>
+            </form>
+          </td>
+          <td><span class="pill ${c.active ? "active" : "inactive"}">${c.active ? "Active" : "Deactivated"}</span></td>
+          <td class="actions-cell">
+            <button class="btn" data-action="toggle" data-id="${c.id}" data-active="${c.active}">${c.active ? "Deactivate" : "Activate"}</button>
+            <button class="btn danger" data-action="delete" data-id="${c.id}" data-name="${escapeHtml(c.name)}">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      tbody.querySelectorAll('[data-action="toggle"]').forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          btn.disabled = true;
+          try {
+            await apiFetch(`/api/admin/customers/${btn.dataset.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ active: btn.dataset.active !== "true" }),
+            });
+            loadCustomers();
+          } catch (err) {
+            alert(err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+      tbody.querySelectorAll('[data-action="delete"]').forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!confirm(`Permanently delete ${btn.dataset.name} and all their coin history? This cannot be undone.`)) return;
+          btn.disabled = true;
+          try {
+            await apiFetch(`/api/admin/customers/${btn.dataset.id}`, { method: "DELETE" });
+            loadCustomers();
+          } catch (err) {
+            alert(err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+      tbody.querySelectorAll(".coin-form").forEach((form) => {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const input = form.querySelector("input");
+          const amount = parseInt(input.value, 10);
+          if (!amount) return;
+          const btn = form.querySelector("button");
+          btn.disabled = true;
+          try {
+            await apiFetch(`/api/admin/customers/${form.dataset.id}/coins`, {
+              method: "POST",
+              body: JSON.stringify({ amount }),
+            });
+            loadCustomers();
+          } catch (err) {
+            alert(err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+    } catch (err) {
+      if (err.message !== "Session expired") alert("Could not load customers: " + err.message);
+    }
+  }
+
+  document.getElementById("customer-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("customer-form-error");
+    errorEl.textContent = "";
+    const name = document.getElementById("customer-name").value.trim();
+    const email = document.getElementById("customer-email").value.trim();
+    const password = document.getElementById("customer-password").value;
+    const coinBalance = parseInt(document.getElementById("customer-coins").value, 10) || 0;
+    try {
+      await apiFetch("/api/admin/customers", {
+        method: "POST",
+        body: JSON.stringify({ name, email, password, coinBalance }),
+      });
+      document.getElementById("customer-form").reset();
+      loadCustomers();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  });
+
+  // ---------- Staff ----------
+
+  async function loadStaff() {
+    const tbody = document.querySelector("#staff-table tbody");
+    const empty = document.getElementById("staff-empty");
+    try {
+      const { staff } = await apiFetch("/api/admin/staff");
+      tbody.innerHTML = "";
+      empty.style.display = staff.length === 0 ? "block" : "none";
+      for (const s of staff) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(s.name)}</td>
+          <td>${escapeHtml(s.location.name)}</td>
+          <td><span class="pill ${s.active ? "active" : "inactive"}">${s.active ? "Active" : "Deactivated"}</span></td>
+          <td class="actions-cell">
+            <button class="btn" data-action="toggle" data-id="${s.id}" data-active="${s.active}">${s.active ? "Deactivate" : "Activate"}</button>
+            <button class="btn danger" data-action="delete" data-id="${s.id}" data-name="${escapeHtml(s.name)}">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      tbody.querySelectorAll('[data-action="toggle"]').forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          btn.disabled = true;
+          try {
+            await apiFetch(`/api/admin/staff/${btn.dataset.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ active: btn.dataset.active !== "true" }),
+            });
+            loadStaff();
+          } catch (err) {
+            alert(err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+      tbody.querySelectorAll('[data-action="delete"]').forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!confirm(`Permanently delete staff account "${btn.dataset.name}"? Their past sales stay on record, but they'll no longer be able to log in.`)) return;
+          btn.disabled = true;
+          try {
+            await apiFetch(`/api/admin/staff/${btn.dataset.id}`, { method: "DELETE" });
+            loadStaff();
+          } catch (err) {
+            alert(err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+    } catch (err) {
+      if (err.message !== "Session expired") alert("Could not load staff: " + err.message);
+    }
+  }
+
+  document.getElementById("staff-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("staff-form-error");
+    errorEl.textContent = "";
+    const name = document.getElementById("staff-name").value.trim();
+    const pin = document.getElementById("staff-pin").value.trim();
+    const locationId = document.getElementById("staff-location").value;
+    if (!locationId) {
+      errorEl.textContent = "Add a location first.";
+      return;
+    }
+    try {
+      await apiFetch("/api/admin/staff", {
+        method: "POST",
+        body: JSON.stringify({ name, pin, locationId }),
+      });
+      document.getElementById("staff-form").reset();
+      loadStaff();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  });
+
+  if (getToken()) {
+    showApp();
+  } else {
+    showLogin();
+  }
+</script>
+</body>
+</html>

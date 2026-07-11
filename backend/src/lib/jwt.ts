@@ -16,10 +16,15 @@ export type StaffTokenPayload = {
   locationId: string;
 };
 
-export type TokenPayload = CustomerTokenPayload | StaffTokenPayload;
+export type AdminTokenPayload = {
+  role: "ADMIN";
+  level: "full" | "limited";
+};
 
-export function signToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+export type TokenPayload = CustomerTokenPayload | StaffTokenPayload | AdminTokenPayload;
+
+export function signToken(payload: TokenPayload, expiresIn: string = "7d"): string {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: expiresIn as jwt.SignOptions["expiresIn"] });
 }
 
 export function verifyToken(token: string): TokenPayload {
