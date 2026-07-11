@@ -1,0 +1,119 @@
+import { FlatList, RefreshControl, StyleSheet } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import { ThemedView } from "@/components/themed-view";
+import { ThemedText } from "@/components/themed-text";
+import { Button } from "@/components/Button";
+import { useAuth } from "@/context/AuthContext";
+import { fetchMyTransactions } from "@/api/me";
+import { CoinTransaction } from "@/api/types";
+
+const TYPE_LABEL: Record<CoinTransaction["type"], string> = {
+  EARN: "Earned",
+  REDEEM: "Redeemed",
+  ADJUSTMENT: "Refunded",
+};
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+export default function History() {
+  const { session } = useAuth();
+
+  const { data, isLoading, isRefetching, error, refetch } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: () => {
+      if (session?.role !== "CUSTOMER") throw new Error("Not a customer session");
+      return fetchMyTransactions(session.token).then((res) => res.transactions);
+    },
+    enabled: session?.role === "CUSTOMER",
+  });
+
+  if (session?.role !== "CUSTOMER") return null;
+
+  return (
+    <ThemedView style={styles.container}>
+      <ThemedText type="title" style={styles.title}>
+        Activity
+      </ThemedText>
+
+      {isLoading ? (
+        <ThemedText themeColor="textSecondary">Loading…</ThemedText>
+      ) : error ? (
+        <ThemedView style={styles.errorBox}>
+          <ThemedText style={styles.error}>Could not load your activity.</ThemedText>
+          <Button title="Retry" variant="secondary" onPress={() => refetch()} />
+        </ThemedView>
+      ) : !data || data.length === 0 ? (
+        <ThemedText themeColor="textSecondary">No activity yet. Buy a meal to earn your first coins.</ThemedText>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+          renderItem={({ item }) => (
+            <ThemedView style={styles.row} type="backgroundElement">
+              <ThemedView type="backgroundElement" style={styles.rowText}>
+                <ThemedText type="smallBold">{TYPE_LABEL[item.type]}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {formatDate(item.createdAt)}
+                </ThemedText>
+              </ThemedView>
+              <ThemedText
+                type="smallBold"
+                style={item.amount >= 0 ? styles.positive : styles.negative}
+              >
+                {item.amount >= 0 ? "+" : ""}
+                {item.amount}
+              </ThemedText>
+            </ThemedView>
+          )}
+        />
+      )}
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 24,
+    paddingTop: 80,
+    gap: 16,
+  },
+  title: {
+    fontSize: 32,
+  },
+  list: {
+    gap: 10,
+  },
+  row: {
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  rowText: {
+    gap: 2,
+  },
+  errorBox: {
+    gap: 12,
+    alignItems: "flex-start",
+  },
+  error: {
+    color: "#C4392B",
+  },
+  positive: {
+    color: "#3FA34D",
+  },
+  negative: {
+    color: "#C4392B",
+  },
+});

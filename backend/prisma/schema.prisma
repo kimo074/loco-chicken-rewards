@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  timezone  String   @default("Europe/Amsterdam")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  staff        StaffUser[]
+  saleCodes    SaleCode[]
+  transactions CoinTransaction[]
+  fulfillments Redemption[]
+}
+
+model Customer {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  coinBalance  Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  claimedSales CoinTransaction[]
+  redemptions  Redemption[]
+  saleClaims   SaleCode[]
+}
+
+model StaffUser {
+  id         String   @id @default(cuid())
+  name       String
+  pinHash    String
+  locationId String
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  location         Location     @relation(fields: [locationId], references: [id])
+  createdSales     SaleCode[]
+  fulfilledRedeems Redemption[]
+}
+
+enum SaleCodeStatus {
+  PENDING
+  CLAIMED
+  EXPIRED
+}
+
+model SaleCode {
+  id                  String         @id @default(cuid())
+  token               String         @unique
+  locationId          String
+  staffUserId         String
+  amountCents         Int
+  coinsAwarded        Int
+  status              SaleCodeStatus @default(PENDING)
+  expiresAt           DateTime
+  claimedAt           DateTime?
+  claimedByCustomerId String?
+  createdAt           DateTime       @default(now())
+
+  location  Location  @relation(fields: [locationId], references: [id])
+  staffUser StaffUser @relation(fields: [staffUserId], references: [id])
+  claimedBy Customer? @relation(fields: [claimedByCustomerId], references: [id])
+
+  transaction CoinTransaction?
+
+  @@index([status, expiresAt])
+}
+
+enum RedemptionStatus {
+  PENDING
+  FULFILLED
+  EXPIRED
+}
+
+model Reward {
+  id           String   @id @default(cuid())
+  name         String
+  description  String
+  costCoins    Int
+  maxValueCents Int
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  redemptions Redemption[]
+}
+
+model Redemption {
+  id                     String           @id @default(cuid())
+  token                  String           @unique
+  shortCode              String
+  customerId             String
+  rewardId               String
+  costCoins              Int
+  status                 RedemptionStatus @default(PENDING)
+  expiresAt              DateTime
+  fulfilledAt            DateTime?
+  fulfilledByStaffId     String?
+  fulfilledAtLocationId  String?
+  createdAt              DateTime         @default(now())
+
+  customer            Customer   @relation(fields: [customerId], references: [id])
+  reward              Reward     @relation(fields: [rewardId], references: [id])
+  fulfilledByStaff    StaffUser? @relation(fields: [fulfilledByStaffId], references: [id])
+  fulfilledAtLocation Location?  @relation(fields: [fulfilledAtLocationId], references: [id])
+
+  transactions CoinTransaction[]
+
+  @@index([status, expiresAt])
+}
+
+enum CoinTransactionType {
+  EARN
+  REDEEM
+  ADJUSTMENT
+}
+
+model CoinTransaction {
+  id                String              @id @default(cuid())
+  customerId        String
+  locationId        String?
+  type              CoinTransactionType
+  amount            Int
+  relatedSaleCodeId String?             @unique
+  relatedRedemptionId String?
+  createdAt         DateTime            @default(now())
+
+  customer         Customer    @relation(fields: [customerId], references: [id])
+  location         Location?   @relation(fields: [locationId], references: [id])
+  relatedSaleCode  SaleCode?   @relation(fields: [relatedSaleCodeId], references: [id])
+  relatedRedemption Redemption? @relation(fields: [relatedRedemptionId], references: [id])
+
+  @@index([customerId, createdAt])
+}
