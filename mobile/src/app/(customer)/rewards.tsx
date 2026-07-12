@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Alert, FlatList, RefreshControl, StyleSheet } from "react-native";
+import { FlatList, RefreshControl, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useQuery } from "@tanstack/react-query";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
 import { fetchRewards } from "@/api/rewards";
 import { createRedemption, RedemptionResult } from "@/api/redemptions";
@@ -15,7 +16,9 @@ import { useCountdown } from "@/hooks/use-countdown";
 export default function Rewards() {
   const { session, refreshSession } = useAuth();
   const [activeRedemption, setActiveRedemption] = useState<RedemptionResult | null>(null);
-  const [redeemingId, setRedeemingId] = useState<string | null>(null);
+  const [pendingReward, setPendingReward] = useState<Reward | null>(null);
+  const [redeeming, setRedeeming] = useState(false);
+  const [redeemError, setRedeemError] = useState<string | null>(null);
 
   const { data, isLoading, isRefetching, error, refetch } = useQuery({
     queryKey: ["rewards"],
@@ -27,27 +30,26 @@ export default function Rewards() {
   if (session?.role !== "CUSTOMER") return null;
   const customerSession = session;
 
-  async function onRedeem(reward: Reward) {
+  function onRedeem(reward: Reward) {
     if (customerSession.customer.coinBalance < reward.costCoins) return;
+    setRedeemError(null);
+    setPendingReward(reward);
+  }
 
-    Alert.alert("Redeem reward?", `This will use ${reward.costCoins} coins for "${reward.name}".`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Redeem",
-        onPress: async () => {
-          setRedeemingId(reward.id);
-          try {
-            const result = await createRedemption(customerSession.token, reward.id);
-            setActiveRedemption(result);
-            await refreshSession();
-          } catch (err) {
-            Alert.alert("Couldn't redeem", err instanceof ApiError ? err.message : "Please try again.");
-          } finally {
-            setRedeemingId(null);
-          }
-        },
-      },
-    ]);
+  async function confirmRedeem() {
+    if (!pendingReward) return;
+    setRedeeming(true);
+    try {
+      const result = await createRedemption(customerSession.token, pendingReward.id);
+      setActiveRedemption(result);
+      setPendingReward(null);
+      await refreshSession();
+    } catch (err) {
+      setRedeemError(err instanceof ApiError ? err.message : "Please try again.");
+      setPendingReward(null);
+    } finally {
+      setRedeeming(false);
+    }
   }
 
   if (activeRedemption) {
@@ -86,6 +88,7 @@ export default function Rewards() {
       <ThemedText themeColor="textSecondary" style={styles.balanceHint}>
         You have {customerSession.customer.coinBalance} coins
       </ThemedText>
+      {redeemError ? <ThemedText style={styles.error}>{redeemError}</ThemedText> : null}
 
       {isLoading ? (
         <ThemedText themeColor="textSecondary">Loading rewards…</ThemedText>
@@ -119,13 +122,22 @@ export default function Rewards() {
                   title={affordable ? "Redeem" : "Not enough coins"}
                   onPress={() => onRedeem(item)}
                   disabled={!affordable}
-                  loading={redeemingId === item.id}
                 />
               </ThemedView>
             );
           }}
         />
       )}
+
+      <ConfirmModal
+        visible={pendingReward !== null}
+        title="Redeem reward?"
+        message={pendingReward ? `This will use ${pendingReward.costCoins} coins for "${pendingReward.name}".` : ""}
+        confirmLabel="Redeem"
+        onConfirm={confirmRedeem}
+        onCancel={() => setPendingReward(null)}
+        confirming={redeeming}
+      />
     </ThemedView>
   );
 }
