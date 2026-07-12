@@ -143,6 +143,28 @@ const toggleActiveSchema = z.object({
   active: z.boolean(),
 });
 
+const resetPasswordSchema = z.object({
+  password: z.string().min(8).max(100),
+});
+
+adminRouter.post(
+  "/customers/:id/password",
+  requireFullAdmin,
+  asyncHandler(async (req, res) => {
+    const { password } = resetPasswordSchema.parse(req.body);
+    const passwordHash = await bcrypt.hash(password, 10);
+    const customer = await prisma.customer
+      .update({
+        where: { id: req.params.id },
+        data: { passwordHash },
+        select: { id: true, name: true, email: true, coinBalance: true, active: true, createdAt: true },
+      })
+      .catch(() => null);
+    if (!customer) throw new HttpError(404, "Customer not found");
+    res.json({ customer });
+  })
+);
+
 adminRouter.patch(
   "/customers/:id",
   requireAdmin,
@@ -191,7 +213,7 @@ const createStaffSchema = z.object({
 
 adminRouter.post(
   "/staff",
-  requireFullAdmin,
+  requireAdmin,
   asyncHandler(async (req, res) => {
     const { name, pin, locationId } = createStaffSchema.parse(req.body);
 
@@ -215,7 +237,7 @@ adminRouter.post(
 
 adminRouter.delete(
   "/staff/:id",
-  requireFullAdmin,
+  requireAdmin,
   asyncHandler(async (req, res) => {
     const deleted = await prisma.staffUser.delete({ where: { id: req.params.id } }).catch(() => null);
     if (!deleted) throw new HttpError(404, "Staff member not found");

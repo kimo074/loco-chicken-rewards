@@ -312,9 +312,11 @@
     color: var(--text-secondary);
     border: 1px solid var(--border);
   }
-  #app.limited .add-form,
-  #app.limited .btn.danger,
-  #app.limited [data-action="edit"] {
+  #app.limited #location-form,
+  #app.limited #customer-form,
+  #app.limited #customers-table .btn.danger,
+  #app.limited [data-action="edit"],
+  #app.limited [data-action="reset-password"] {
     display: none;
   }
   #app.limited .coin-form { display: none; }
@@ -827,6 +829,7 @@
           <td><span class="pill ${c.active ? "active" : "inactive"}">${c.active ? "Active" : "Deactivated"}</span></td>
           <td class="actions-cell">
             <button class="btn" data-action="toggle" data-id="${c.id}" data-active="${c.active}">${c.active ? "Deactivate" : "Activate"}</button>
+            <button class="btn" data-action="reset-password" data-id="${c.id}" data-name="${escapeHtml(c.name)}">Reset password</button>
             <button class="btn danger" data-action="delete" data-id="${c.id}" data-name="${escapeHtml(c.name)}">Delete</button>
           </td>
         `;
@@ -843,6 +846,28 @@
             loadCustomers();
           } catch (err) {
             alert(err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+      tbody.querySelectorAll('[data-action="reset-password"]').forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const password = prompt(`New password for ${btn.dataset.name} (min. 8 characters):`);
+          if (password === null) return;
+          if (password.length < 8) {
+            alert("Password must be at least 8 characters.");
+            return;
+          }
+          btn.disabled = true;
+          try {
+            await apiFetch(`/api/admin/customers/${btn.dataset.id}/password`, {
+              method: "POST",
+              body: JSON.stringify({ password }),
+            });
+            alert(`Password reset for ${btn.dataset.name}.`);
+          } catch (err) {
+            alert(err.message);
+          } finally {
             btn.disabled = false;
           }
         });
