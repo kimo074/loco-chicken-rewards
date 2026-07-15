@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from "expo-camera";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
 import { Button } from "@/components/Button";
+import { WebBarcodeScanner } from "@/components/WebBarcodeScanner";
 import { useAuth } from "@/context/AuthContext";
 import { fulfillRedemption, FulfillResult } from "@/api/redemptions";
 import { ApiError } from "@/api/client";
@@ -37,6 +38,12 @@ export default function RedeemScan() {
     if (scanned) return;
     setScanned(true);
     await submitFulfill({ token: result.data });
+  }
+
+  async function onWebScanned(data: string) {
+    if (scanned) return;
+    setScanned(true);
+    await submitFulfill({ token: data });
   }
 
   async function onSubmitShortCode() {
@@ -77,7 +84,9 @@ export default function RedeemScan() {
 
   return (
     <ThemedView style={styles.container}>
-      {permission?.granted ? (
+      {Platform.OS === "web" ? (
+        <WebBarcodeScanner style={styles.camera} active={!scanned} onScanned={onWebScanned} />
+      ) : permission?.granted ? (
         <CameraView
           style={styles.camera}
           barcodeScannerSettings={{ barcodeTypes: ["qr"] }}

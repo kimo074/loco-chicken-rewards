@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { StyleSheet } from "react-native";
+import { useCallback, useState } from "react";
+import { Platform, StyleSheet } from "react-native";
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from "expo-camera";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
+import { WebBarcodeScanner } from "@/components/WebBarcodeScanner";
 import { useAuth } from "@/context/AuthContext";
 import { claimSale } from "@/api/sales";
 import { ApiError } from "@/api/client";
@@ -19,31 +20,47 @@ export default function ScanToEarn() {
   if (session?.role !== "CUSTOMER") return null;
   const customerSession = session;
 
+  const claimToken = useCallback(
+    async (token: string) => {
+      try {
+        const { coinsAwarded } = await claimSale(customerSession.token, token);
+        setClaimState({ status: "success", coinsAwarded });
+        await refreshSession();
+      } catch (err) {
+        setClaimState({
+          status: "error",
+          message: err instanceof ApiError ? err.message : "Something went wrong. Please try again.",
+        });
+      }
+    },
+    [customerSession.token, refreshSession]
+  );
+
   async function onBarcodeScanned(result: BarcodeScanningResult) {
     if (scanned) return;
     setScanned(true);
-    try {
-      const { coinsAwarded } = await claimSale(customerSession.token, result.data);
-      setClaimState({ status: "success", coinsAwarded });
-      await refreshSession();
-    } catch (err) {
-      setClaimState({
-        status: "error",
-        message: err instanceof ApiError ? err.message : "Something went wrong. Please try again.",
-      });
-    }
+    await claimToken(result.data);
   }
+
+  const onWebScanned = useCallback(
+    (data: string) => {
+      if (scanned) return;
+      setScanned(true);
+      claimToken(data);
+    },
+    [scanned, claimToken]
+  );
 
   function onScanAgain() {
     setScanned(false);
     setClaimState({ status: "idle" });
   }
 
-  if (!permission) {
+  if (!permission && Platform.OS !== "web") {
     return <ThemedView style={styles.container} />;
   }
 
-  if (!permission.granted) {
+  if (Platform.OS !== "web" && !permission?.granted) {
     return (
       <ThemedView style={[styles.container, styles.centered]}>
         <ThemedText type="subtitle" style={styles.permissionTitle}>
@@ -85,11 +102,15 @@ export default function ScanToEarn() {
 
   return (
     <ThemedView style={styles.container}>
-      <CameraView
-        style={styles.camera}
-        barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-        onBarcodeScanned={scanned ? undefined : onBarcodeScanned}
-      />
+      {Platform.OS === "web" ? (
+        <WebBarcodeScanner style={styles.camera} active={!scanned} onScanned={onWebScanned} />
+      ) : (
+        <CameraView
+          style={styles.camera}
+          barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+          onBarcodeScanned={scanned ? undefined : onBarcodeScanned}
+        />
+      )}
       <ThemedView style={styles.hint}>
         <ThemedText themeColor="textSecondary">Point your camera at the code on the register</ThemedText>
       </ThemedView>
