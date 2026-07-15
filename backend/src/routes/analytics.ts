@@ -55,7 +55,7 @@ analyticsRouter.get(
         select: { id: true, name: true, email: true, coinBalance: true, active: true },
       }),
       prisma.staffUser.findMany({
-        select: { id: true, name: true, active: true, location: { select: { id: true, name: true } } },
+        select: { id: true, name: true, active: true, points: true, location: { select: { id: true, name: true } } },
       }),
       prisma.location.findMany({ select: { id: true, name: true, active: true } }),
       prisma.saleCode.groupBy({
@@ -86,6 +86,7 @@ analyticsRouter.get(
           id: staff.id,
           name: staff.name,
           active: staff.active,
+          points: staff.points,
           locationName: staff.location.name,
           salesCount: sales?._count._all ?? 0,
           totalAmountCents: sales?._sum.amountCents ?? 0,

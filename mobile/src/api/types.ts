@@ -9,6 +9,7 @@ export type StaffUser = {
   id: string;
   name: string;
   locationId: string;
+  points: number;
 };
 
 export type Location = {

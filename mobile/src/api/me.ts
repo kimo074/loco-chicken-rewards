@@ -3,7 +3,7 @@ import { Customer, CoinTransaction, Redemption } from "./types";
 
 export type MeResponse =
   | { role: "CUSTOMER"; customer: Customer }
-  | { role: "STAFF"; staff: { id: string; name: string; location: { id: string; name: string } } };
+  | { role: "STAFF"; staff: { id: string; name: string; points: number; location: { id: string; name: string } } };
 
 export function fetchMe(token: string) {
   return apiFetch<MeResponse>("/api/me", { token });

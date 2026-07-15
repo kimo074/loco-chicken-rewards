@@ -58,6 +58,13 @@ export async function claimSaleCode(params: { token: string; customerId: string 
       data: { coinBalance: { increment: saleCode.coinsAwarded } },
     });
 
+    if (saleCode.staffUserId) {
+      await tx.staffUser.update({
+        where: { id: saleCode.staffUserId },
+        data: { points: { increment: 1 } },
+      });
+    }
+
     return { saleCode, coinBalance: customer.coinBalance };
   });
 }

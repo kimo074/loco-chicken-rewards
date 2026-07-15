@@ -27,7 +27,7 @@ meRouter.get(
       if (!staff) throw new HttpError(404, "Staff user not found");
       res.json({
         role: "STAFF",
-        staff: { id: staff.id, name: staff.name, location: staff.location },
+        staff: { id: staff.id, name: staff.name, points: staff.points, location: staff.location },
       });
       return;
     }

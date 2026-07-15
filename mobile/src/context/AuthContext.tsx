@@ -30,7 +30,13 @@ async function sessionFromToken(token: string): Promise<Session> {
   return {
     role: "STAFF",
     token,
-    staff: { id: me.staff.id, name: me.staff.name, locationId: me.staff.location.id, locationName: me.staff.location.name },
+    staff: {
+      id: me.staff.id,
+      name: me.staff.name,
+      points: me.staff.points,
+      locationId: me.staff.location.id,
+      locationName: me.staff.location.name,
+    },
   };
 }
 

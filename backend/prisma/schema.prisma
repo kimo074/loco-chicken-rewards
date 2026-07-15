@@ -41,6 +41,7 @@ model StaffUser {
   pinHash    String
   locationId String
   active     Boolean  @default(true)
+  points     Int      @default(0)
   createdAt  DateTime @default(now())
 
   location         Location     @relation(fields: [locationId], references: [id])

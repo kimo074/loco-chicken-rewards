@@ -18,6 +18,18 @@ export default function StaffHome() {
       </ThemedText>
       <ThemedText themeColor="textSecondary">{session.staff.locationName}</ThemedText>
 
+      <ThemedView style={styles.pointsCard} type="backgroundElement">
+        <ThemedText type="small" themeColor="textSecondary">
+          Your points
+        </ThemedText>
+        <ThemedText type="title" style={styles.pointsValue}>
+          {session.staff.points}
+        </ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          1 point per order · rewards coming soon
+        </ThemedText>
+      </ThemedView>
+
       <Button title="Log out" variant="secondary" onPress={logout} />
     </ThemedView>
   );
@@ -32,5 +44,15 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 32,
+  },
+  pointsCard: {
+    borderRadius: 16,
+    padding: 20,
+    gap: 4,
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  pointsValue: {
+    fontSize: 40,
   },
 });
