@@ -24,7 +24,7 @@ export default function StaffLayout() {
       />
       <Tabs.Screen
         name="redeem-scan"
-        options={{ title: "Redeem", tabBarIcon: ({ color, size }) => <Ionicons name="qr-code" color={color} size={size} /> }}
+        options={{ title: "Rewards", tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color} size={size} /> }}
       />
     </Tabs>
   );
