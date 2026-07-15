@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { requireAuth } from "../middleware/auth";
 import { asyncHandler, HttpError } from "../middleware/errorHandler";
@@ -33,6 +34,26 @@ meRouter.get(
     }
 
     throw new HttpError(401, "Unauthorized");
+  })
+);
+
+const logShiftOrdersSchema = z.object({
+  orders: z.number().int().min(1).max(500),
+});
+
+meRouter.post(
+  "/staff/shift-orders",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    if (req.auth?.role !== "STAFF") throw new HttpError(403, "Staff access required");
+
+    const { orders } = logShiftOrdersSchema.parse(req.body);
+    const staff = await prisma.staffUser.update({
+      where: { id: req.auth.staffUserId },
+      data: { points: { increment: orders } },
+    });
+
+    res.json({ points: staff.points });
   })
 );
 

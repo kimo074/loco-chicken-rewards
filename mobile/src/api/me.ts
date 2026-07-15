@@ -16,3 +16,11 @@ export function fetchMyTransactions(token: string) {
 export function fetchMyRedemptions(token: string) {
   return apiFetch<{ redemptions: Redemption[] }>("/api/me/redemptions", { token });
 }
+
+export function logShiftOrders(token: string, orders: number) {
+  return apiFetch<{ points: number }>("/api/me/staff/shift-orders", {
+    method: "POST",
+    token,
+    body: { orders },
+  });
+}

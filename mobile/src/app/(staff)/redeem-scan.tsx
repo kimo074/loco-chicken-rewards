@@ -8,19 +8,40 @@ import { Button } from "@/components/Button";
 import { WebBarcodeScanner } from "@/components/WebBarcodeScanner";
 import { useAuth } from "@/context/AuthContext";
 import { fulfillRedemption, FulfillResult } from "@/api/redemptions";
+import { logShiftOrders } from "@/api/me";
 import { ApiError } from "@/api/client";
 
 type FulfillState = { status: "idle" } | { status: "success"; result: FulfillResult } | { status: "error"; message: string };
 
 export default function RedeemScan() {
-  const { session } = useAuth();
+  const { session, refreshSession } = useAuth();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [shortCode, setShortCode] = useState("");
   const [fulfillState, setFulfillState] = useState<FulfillState>({ status: "idle" });
+  const [shiftOrders, setShiftOrders] = useState("");
+  const [loggingShift, setLoggingShift] = useState(false);
+  const [shiftLogMessage, setShiftLogMessage] = useState<string | null>(null);
 
   if (session?.role !== "STAFF") return null;
   const staffSession = session;
+
+  async function onLogShiftOrders() {
+    const orders = parseInt(shiftOrders, 10);
+    if (!orders || orders < 1) return;
+    setLoggingShift(true);
+    setShiftLogMessage(null);
+    try {
+      const { points } = await logShiftOrders(staffSession.token, orders);
+      setShiftLogMessage(`Added! Your total is now ${points} points.`);
+      setShiftOrders("");
+      await refreshSession();
+    } catch (err) {
+      setShiftLogMessage(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setLoggingShift(false);
+    }
+  }
 
   async function submitFulfill(identifier: { token: string } | { shortCode: string }) {
     try {
@@ -111,6 +132,27 @@ export default function RedeemScan() {
         />
         <Button title="Fulfill" onPress={onSubmitShortCode} disabled={shortCode.trim().length < 6} />
       </ThemedView>
+
+      <ThemedView style={styles.shiftEntry} type="backgroundElement">
+        <ThemedText type="smallBold">Log your shift</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          Add the number of orders you handled this shift to your points.
+        </ThemedText>
+        <TextField
+          label="Orders this shift"
+          value={shiftOrders}
+          onChangeText={setShiftOrders}
+          keyboardType="number-pad"
+          placeholder="e.g. 12"
+        />
+        {shiftLogMessage ? <ThemedText type="small">{shiftLogMessage}</ThemedText> : null}
+        <Button
+          title="Add points"
+          onPress={onLogShiftOrders}
+          loading={loggingShift}
+          disabled={!shiftOrders.trim() || parseInt(shiftOrders, 10) < 1}
+        />
+      </ThemedView>
     </ThemedView>
   );
 }
@@ -125,6 +167,13 @@ const styles = StyleSheet.create({
   manualEntry: {
     padding: 20,
     gap: 12,
+  },
+  shiftEntry: {
+    margin: 20,
+    marginTop: 0,
+    padding: 20,
+    borderRadius: 16,
+    gap: 10,
   },
   centered: {
     alignItems: "center",
