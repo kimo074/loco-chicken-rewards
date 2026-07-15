@@ -11,6 +11,11 @@ type WebBarcodeScannerProps = {
   style?: ViewStyle;
 };
 
+// Plain literal CSS objects on purpose: these elements are raw DOM nodes
+// (not RN-web View/Image), so they need real style objects, not StyleSheet refs.
+const videoStyle: Record<string, unknown> = { width: "100%", height: "100%", objectFit: "cover", backgroundColor: "#000" };
+const hiddenCanvasStyle: Record<string, unknown> = { display: "none" };
+
 const Video = (props: Record<string, unknown>) => createElement("video", props);
 const Canvas = (props: Record<string, unknown>) => createElement("canvas", props);
 
@@ -19,22 +24,37 @@ export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScanne
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [permissionState, setPermissionState] = useState<"idle" | "granted" | "denied">("idle");
+  const [state, setState] = useState<"idle" | "granted" | "denied" | "error">("idle");
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
   async function requestAccess() {
+    setErrorDetail(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" } },
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+      const video = videoRef.current;
+      if (video) {
+        // Set as real DOM properties, not just JSX attributes: React doesn't
+        // always apply `muted` reliably on <video>, and Chrome silently blocks
+        // autoplay of unmuted video after an await breaks the user-gesture chain.
+        video.muted = true;
+        video.playsInline = true;
+        video.srcObject = stream;
+        try {
+          await video.play();
+        } catch (playErr) {
+          setState("error");
+          setErrorDetail(playErr instanceof Error ? playErr.message : "Could not start the camera preview.");
+          return;
+        }
       }
-      setPermissionState("granted");
-    } catch {
-      setPermissionState("denied");
+      setState("granted");
+    } catch (err) {
+      setState("denied");
+      setErrorDetail(err instanceof Error ? err.message : null);
     }
   }
 
@@ -46,7 +66,7 @@ export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScanne
   }, []);
 
   useEffect(() => {
-    if (permissionState !== "granted" || !active) return;
+    if (state !== "granted" || !active) return;
 
     function tick() {
       const video = videoRef.current;
@@ -74,15 +94,19 @@ export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScanne
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
-  }, [permissionState, active, onScanned]);
+  }, [state, active, onScanned]);
 
-  if (permissionState !== "granted") {
+  if (state !== "granted") {
+    const message =
+      state === "denied"
+        ? "Camera access was denied. Please allow camera access in your browser settings and try again."
+        : state === "error"
+          ? `Could not start the camera. ${errorDetail ?? "Please try again."}`
+          : "We use your camera to scan the code shown at the register.";
     return (
       <ThemedView style={[styles.permissionContainer, style]} type="backgroundElement">
         <ThemedText themeColor="textSecondary" style={styles.permissionBody}>
-          {permissionState === "denied"
-            ? "Camera access was denied. Please allow camera access in your browser settings and try again."
-            : "We use your camera to scan the code shown at the register."}
+          {message}
         </ThemedText>
         <Button title="Grant camera access" onPress={requestAccess} />
       </ThemedView>
@@ -91,8 +115,8 @@ export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScanne
 
   return (
     <ThemedView style={[styles.container, style]}>
-      <Video ref={videoRef} autoPlay playsInline muted style={styles.video} />
-      <Canvas ref={canvasRef} style={styles.hiddenCanvas} />
+      <Video ref={videoRef} autoPlay playsInline muted style={videoStyle} />
+      <Canvas ref={canvasRef} style={hiddenCanvasStyle} />
     </ThemedView>
   );
 }
@@ -101,14 +125,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     overflow: "hidden",
-  },
-  video: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
-  hiddenCanvas: {
-    display: "none",
   },
   permissionContainer: {
     flex: 1,
