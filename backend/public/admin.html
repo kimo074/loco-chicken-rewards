@@ -377,6 +377,7 @@
                   <th>Sales</th>
                   <th>Revenue</th>
                   <th>Points</th>
+                  <th>Award</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -609,6 +610,21 @@
     return "€" + (cents / 100).toFixed(2);
   }
 
+  const STAFF_TIERS = [
+    { name: "Bronze", emoji: "🥉", threshold: 5000 },
+    { name: "Silver", emoji: "🥈", threshold: 10000 },
+    { name: "Gold", emoji: "🥇", threshold: 100000 },
+    { name: "Master", emoji: "🏆", threshold: 1000000 },
+  ];
+
+  function staffTierLabel(points) {
+    let current = null;
+    for (const tier of STAFF_TIERS) {
+      if (points >= tier.threshold) current = tier;
+    }
+    return current ? `${current.emoji} ${current.name}` : "—";
+  }
+
   // ---------- Analytics ----------
 
   async function loadAnalytics() {
@@ -685,6 +701,7 @@
           <td class="balance">${s.salesCount}</td>
           <td class="balance">${formatCents(s.totalAmountCents)}</td>
           <td class="balance">${s.points}</td>
+          <td class="balance">${staffTierLabel(s.points)}</td>
         </tr>
       `
       )
