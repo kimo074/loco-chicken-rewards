@@ -7,26 +7,7 @@ import { Button } from "@/components/Button";
 import { useAuth } from "@/context/AuthContext";
 import { logShiftOrders } from "@/api/me";
 import { ApiError } from "@/api/client";
-import { STAFF_TIERS, StaffTier } from "@/lib/staffTiers";
-
-function AchievementRow({ tier, points }: { tier: StaffTier; points: number }) {
-  const achieved = points >= tier.threshold;
-  const remaining = tier.threshold - points;
-  return (
-    <ThemedView style={[styles.achievementRow, achieved && styles.achievementRowDone]} type="backgroundElement">
-      <ThemedText style={styles.achievementEmoji}>{achieved ? tier.emoji : "🔒"}</ThemedText>
-      <ThemedView type="backgroundElement" style={styles.achievementBody}>
-        <ThemedText type="smallBold">{tier.name} Award</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {achieved
-            ? `Achieved · ${tier.threshold.toLocaleString()} orders`
-            : `${remaining.toLocaleString()} orders to go · ${tier.threshold.toLocaleString()} total`}
-        </ThemedText>
-      </ThemedView>
-      {achieved ? <ThemedText style={styles.checkmark}>✅</ThemedText> : null}
-    </ThemedView>
-  );
-}
+import { STAFF_TIERS, getStaffTierProgress } from "@/lib/staffTiers";
 
 export default function RedeemScan() {
   const { session, refreshSession } = useAuth();
@@ -36,6 +17,13 @@ export default function RedeemScan() {
 
   if (session?.role !== "STAFF") return null;
   const staffSession = session;
+  const points = staffSession.staff.points;
+
+  const { current, next } = getStaffTierProgress(points);
+  const previousThreshold = current?.threshold ?? 0;
+  const progressFraction = next ? Math.min(1, Math.max(0, (points - previousThreshold) / (next.threshold - previousThreshold))) : 1;
+  const nextIndex = next ? STAFF_TIERS.findIndex((t) => t.name === next.name) : -1;
+  const afterNext = nextIndex >= 0 && nextIndex + 1 < STAFF_TIERS.length ? STAFF_TIERS[nextIndex + 1] : null;
 
   async function onLogShiftOrders() {
     const orders = parseInt(shiftOrders, 10);
@@ -65,14 +53,8 @@ export default function RedeemScan() {
           <ThemedText style={styles.bannerEmoji}>🎁</ThemedText>
           <ThemedText type="subtitle">Coming soon</ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={styles.bannerBody}>
-            Real perks for your points are on the way. Here&apos;s what you&apos;re working toward:
+            Real perks for your points are on the way. You earn 1 point for every order.
           </ThemedText>
-        </ThemedView>
-
-        <ThemedView style={styles.achievementList}>
-          {STAFF_TIERS.map((tier) => (
-            <AchievementRow key={tier.name} tier={tier} points={staffSession.staff.points} />
-          ))}
         </ThemedView>
 
         <ThemedView style={styles.shiftEntry} type="backgroundElement">
@@ -95,6 +77,39 @@ export default function RedeemScan() {
             disabled={!shiftOrders.trim() || parseInt(shiftOrders, 10) < 1}
           />
         </ThemedView>
+
+        {next ? (
+          <ThemedView style={styles.progressCard} type="backgroundElement">
+            <ThemedText style={styles.progressEmoji}>{next.emoji}</ThemedText>
+            <ThemedText type="subtitle">{next.name} Award</ThemedText>
+            <ThemedView style={styles.progressTrack} type="backgroundElement">
+              <ThemedView style={[styles.progressFill, { width: `${progressFraction * 100}%` }]} />
+            </ThemedView>
+            <ThemedText type="small" themeColor="textSecondary">
+              {points.toLocaleString()} / {next.threshold.toLocaleString()} orders · {(next.threshold - points).toLocaleString()} to go
+            </ThemedText>
+          </ThemedView>
+        ) : (
+          <ThemedView style={styles.progressCard} type="backgroundElement">
+            <ThemedText style={styles.progressEmoji}>🏆</ThemedText>
+            <ThemedText type="subtitle">Master Award achieved!</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              You&apos;ve reached the highest award.
+            </ThemedText>
+          </ThemedView>
+        )}
+
+        {afterNext ? (
+          <ThemedView style={styles.lockedCard} type="backgroundElement">
+            <ThemedText style={styles.lockedEmoji}>{afterNext.emoji}</ThemedText>
+            <ThemedText type="subtitle">{afterNext.name} Award</ThemedText>
+            <ThemedView style={styles.lockedBadge}>
+              <ThemedText type="small" style={styles.lockedBadgeText}>
+                🔒 Coming soon
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
+        ) : null}
       </ScrollView>
     </ThemedView>
   );
@@ -128,33 +143,49 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-  achievementList: {
-    gap: 10,
-  },
-  achievementRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 14,
-    padding: 14,
-    gap: 12,
-    opacity: 0.6,
-  },
-  achievementRowDone: {
-    opacity: 1,
-  },
-  achievementEmoji: {
-    fontSize: 28,
-  },
-  achievementBody: {
-    flex: 1,
-    gap: 2,
-  },
-  checkmark: {
-    fontSize: 18,
-  },
   shiftEntry: {
     padding: 20,
     borderRadius: 16,
     gap: 10,
+  },
+  progressCard: {
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    gap: 8,
+  },
+  progressEmoji: {
+    fontSize: 32,
+  },
+  progressTrack: {
+    width: "100%",
+    height: 12,
+    borderRadius: 6,
+    overflow: "hidden",
+    backgroundColor: "rgba(128,128,128,0.25)",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 6,
+    backgroundColor: "#E85D2E",
+  },
+  lockedCard: {
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    gap: 8,
+    opacity: 0.5,
+  },
+  lockedEmoji: {
+    fontSize: 32,
+  },
+  lockedBadge: {
+    backgroundColor: "rgba(128,128,128,0.3)",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  lockedBadgeText: {
+    letterSpacing: 0.5,
   },
 });
