@@ -3,14 +3,16 @@ import { StyleSheet } from "react-native";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
+import { LocoCoin } from "@/components/LocoCoin";
 
 export default function Welcome() {
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.hero}>
-        <ThemedText type="title" style={styles.title}>
-          Loco Chicken
-        </ThemedText>
+        <ThemedView style={styles.badgeGlow}>
+          <LocoCoin size={112} />
+        </ThemedView>
+        <ThemedText style={styles.title}>Loco Chicken</ThemedText>
         <ThemedText type="subtitle" themeColor="textSecondary" style={styles.subtitle}>
           Earn coins on every meal. Redeem them for free food.
         </ThemedText>
@@ -36,18 +38,37 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     padding: 24,
-    paddingTop: 120,
+    paddingTop: 100,
     paddingBottom: 48,
   },
   hero: {
-    gap: 12,
+    gap: 10,
+    alignItems: "center",
+  },
+  badgeGlow: {
+    marginBottom: 10,
+    borderRadius: 56,
+    shadowColor: "#D6241F",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.65,
+    shadowRadius: 28,
+    elevation: 10,
   },
   title: {
     fontSize: 40,
+    fontWeight: "900",
+    letterSpacing: 0.5,
+    color: "#D6241F",
+    textAlign: "center",
+    textShadowColor: "rgba(246, 185, 13, 0.55)",
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
   },
   subtitle: {
-    fontSize: 18,
-    lineHeight: 26,
+    fontSize: 17,
+    lineHeight: 24,
+    textAlign: "center",
+    maxWidth: 320,
   },
   actions: {
     gap: 12,
