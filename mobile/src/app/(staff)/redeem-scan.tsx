@@ -17,7 +17,7 @@ export default function RedeemScan() {
 
   if (session?.role !== "STAFF") return null;
   const staffSession = session;
-  const points = staffSession.staff.points;
+  const points = staffSession.staff.points ?? 0;
 
   const { current, next } = getStaffTierProgress(points);
   const previousThreshold = current?.threshold ?? 0;

@@ -9,7 +9,8 @@ export default function StaffHome() {
   const { session, logout } = useAuth();
   if (session?.role !== "STAFF") return null;
 
-  const { current, next, pointsToNext } = getStaffTierProgress(session.staff.points);
+  const points = session.staff.points ?? 0;
+  const { current, next, pointsToNext } = getStaffTierProgress(points);
 
   return (
     <ThemedView style={styles.container}>
@@ -26,7 +27,7 @@ export default function StaffHome() {
           Your points
         </ThemedText>
         <ThemedText type="title" style={styles.pointsValue}>
-          {session.staff.points}
+          {points}
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           1 point per order · rewards coming soon
