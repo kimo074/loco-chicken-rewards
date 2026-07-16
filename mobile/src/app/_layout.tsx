@@ -1,8 +1,8 @@
 import { Stack } from "expo-router";
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ActivityIndicator, useColorScheme } from "react-native";
+import { ActivityIndicator } from "react-native";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemedView } from "@/components/themed-view";
 
@@ -35,13 +35,11 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-          <StatusBar style="auto" />
+        <ThemeProvider value={DarkTheme}>
+          <StatusBar style="light" />
           <RootNavigator />
         </ThemeProvider>
       </AuthProvider>

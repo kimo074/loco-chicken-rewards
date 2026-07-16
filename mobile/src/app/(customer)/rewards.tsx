@@ -8,12 +8,14 @@ import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { LocoCoin } from "@/components/LocoCoin";
+import { ConfettiBurst } from "@/components/ConfettiBurst";
 import { useAuth } from "@/context/AuthContext";
 import { fetchRewards } from "@/api/rewards";
 import { createRedemption, RedemptionResult } from "@/api/redemptions";
 import { ApiError } from "@/api/client";
 import { Reward } from "@/api/types";
 import { useCountdown } from "@/hooks/use-countdown";
+import { rewardIcon } from "@/lib/rewardIcon";
 
 export default function Rewards() {
   const { session, refreshSession } = useAuth();
@@ -21,6 +23,7 @@ export default function Rewards() {
   const [pendingReward, setPendingReward] = useState<Reward | null>(null);
   const [redeeming, setRedeeming] = useState(false);
   const [redeemError, setRedeemError] = useState<string | null>(null);
+  const [confettiKey, setConfettiKey] = useState(0);
   const redeemSound = useAudioPlayer(require("../../../assets/sounds/redeem-cluck.wav"));
 
   const { data, isLoading, isRefetching, error, refetch } = useQuery({
@@ -47,6 +50,7 @@ export default function Rewards() {
       setActiveRedemption(result);
       setPendingReward(null);
       redeemSound.seekTo(0).finally(() => redeemSound.play());
+      setConfettiKey((key) => key + 1);
       await refreshSession();
     } catch (err) {
       setRedeemError(err instanceof ApiError ? err.message : "Please try again.");
@@ -60,6 +64,7 @@ export default function Rewards() {
     return (
       <ThemedView style={styles.container}>
         <ThemedView style={styles.qrCard} type="backgroundElement">
+          <ConfettiBurst burstKey={confettiKey} />
           {expired ? (
             <ThemedText type="subtitle" style={styles.expiredText}>
               This code has expired
@@ -77,7 +82,7 @@ export default function Rewards() {
           )}
         </ThemedView>
         <ThemedText type="subtitle" style={styles.rewardName}>
-          {activeRedemption.reward.name}
+          {rewardIcon(activeRedemption.reward)} {activeRedemption.reward.name}
         </ThemedText>
         <Button title="Done" onPress={() => setActiveRedemption(null)} />
       </ThemedView>
@@ -117,7 +122,7 @@ export default function Rewards() {
             return (
               <ThemedView style={[styles.card, !affordable && styles.cardLocked]} type="backgroundElement">
                 <ThemedView style={styles.cardIconBadge}>
-                  <ThemedText style={styles.cardIconEmoji}>🎁</ThemedText>
+                  <ThemedText style={styles.cardIconEmoji}>{rewardIcon(item)}</ThemedText>
                 </ThemedView>
                 <ThemedView type="backgroundElement" style={styles.cardBody}>
                   <ThemedText type="smallBold">{item.name}</ThemedText>
