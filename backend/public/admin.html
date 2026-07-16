@@ -376,6 +376,8 @@
                   <th>Staff</th>
                   <th>Sales</th>
                   <th>Revenue</th>
+                  <th>Shift-logged</th>
+                  <th>Customer-scanned</th>
                   <th>Points</th>
                   <th>Award</th>
                 </tr>
@@ -700,6 +702,8 @@
           </td>
           <td class="balance">${s.salesCount}</td>
           <td class="balance">${formatCents(s.totalAmountCents)}</td>
+          <td class="balance">${s.manualOrdersLogged}</td>
+          <td class="balance">${s.customerScannedOrders}</td>
           <td class="balance">${s.points}</td>
           <td class="balance">${staffTierLabel(s.points)}</td>
         </tr>

@@ -61,7 +61,7 @@ export async function claimSaleCode(params: { token: string; customerId: string 
     if (saleCode.staffUserId) {
       await tx.staffUser.update({
         where: { id: saleCode.staffUserId },
-        data: { points: { increment: 1 } },
+        data: { points: { increment: 1 }, customerScannedOrders: { increment: 1 } },
       });
     }
 

@@ -50,7 +50,7 @@ meRouter.post(
     const { orders } = logShiftOrdersSchema.parse(req.body);
     const staff = await prisma.staffUser.update({
       where: { id: req.auth.staffUserId },
-      data: { points: { increment: orders } },
+      data: { points: { increment: orders }, manualOrdersLogged: { increment: orders } },
     });
 
     res.json({ points: staff.points });

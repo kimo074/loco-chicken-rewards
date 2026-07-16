@@ -36,13 +36,15 @@ model Customer {
 }
 
 model StaffUser {
-  id         String   @id @default(cuid())
-  name       String
-  pinHash    String
-  locationId String
-  active     Boolean  @default(true)
-  points     Int      @default(0)
-  createdAt  DateTime @default(now())
+  id                    String   @id @default(cuid())
+  name                  String
+  pinHash               String
+  locationId            String
+  active                Boolean  @default(true)
+  points                Int      @default(0)
+  manualOrdersLogged    Int      @default(0)
+  customerScannedOrders Int      @default(0)
+  createdAt             DateTime @default(now())
 
   location         Location     @relation(fields: [locationId], references: [id])
   createdSales     SaleCode[]
