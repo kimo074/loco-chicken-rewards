@@ -47,10 +47,12 @@ const styles = StyleSheet.create({
   hero: {
     gap: 10,
     alignItems: "center",
+    backgroundColor: "transparent",
   },
   badgeGlow: {
     marginBottom: 10,
     borderRadius: 56,
+    backgroundColor: "transparent",
     shadowColor: "#D6241F",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.65,
@@ -82,5 +84,6 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: 12,
+    backgroundColor: "transparent",
   },
 });

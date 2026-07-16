@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 16,
+    backgroundColor: "transparent",
   },
   error: {
     color: "#C4392B",

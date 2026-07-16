@@ -141,6 +141,7 @@ const styles = StyleSheet.create({
   errorBox: {
     gap: 12,
     alignItems: "flex-start",
+    backgroundColor: "transparent",
   },
   error: {
     color: "#C4392B",

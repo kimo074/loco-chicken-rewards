@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 12,
+    backgroundColor: "transparent",
   },
   error: {
     color: "#C4392B",
