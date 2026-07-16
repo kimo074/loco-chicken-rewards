@@ -104,7 +104,7 @@ analyticsRouter.get(
           redemptionsFulfilled: redemptionsByStaffMap.get(staff.id) ?? 0,
         };
       })
-      .sort((a, b) => b.salesCount - a.salesCount);
+      .sort((a, b) => b.points - a.points);
 
     const staffCountByLocation = new Map<string, number>();
     for (const staff of allStaff) {

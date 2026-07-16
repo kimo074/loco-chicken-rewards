@@ -16,6 +16,8 @@
     --mono-bg: #f2ece3;
     --good: #2a8a4a;
     --bad: #c4392b;
+    --bar-scanned: #e85d2e;
+    --bar-logged: #3d7dd6;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -29,6 +31,8 @@
       --mono-bg: #2a231c;
       --good: #4cbf74;
       --bad: #ff6b57;
+      --bar-scanned: #ff7a45;
+      --bar-logged: #6ab0ff;
     }
   }
   * { box-sizing: border-box; }
@@ -126,6 +130,26 @@
     border-radius: 6px;
   }
   .name-with-bar { display: flex; flex-direction: column; gap: 4px; }
+  .stacked-bar-track {
+    background: var(--mono-bg);
+    border-radius: 6px;
+    height: 8px;
+    width: 160px;
+    overflow: hidden;
+    display: flex;
+  }
+  .stacked-bar-scanned { background: var(--bar-scanned); height: 100%; }
+  .stacked-bar-logged { background: var(--bar-logged); height: 100%; }
+  .bar-legend {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  .bar-legend-item { display: flex; align-items: center; gap: 6px; }
+  .bar-legend-swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
   section {
     margin-bottom: 44px;
   }
@@ -368,6 +392,10 @@
         </div>
         <div>
           <h2>Staff Leaderboard</h2>
+          <div class="bar-legend">
+            <div class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--bar-scanned)"></span>Customer-scanned</div>
+            <div class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--bar-logged)"></span>Shift-logged</div>
+          </div>
           <div class="table-wrap">
             <table id="staff-leaderboard-table">
               <thead>
@@ -688,16 +716,22 @@
     const tbody = document.querySelector("#staff-leaderboard-table tbody");
     const empty = document.getElementById("staff-leaderboard-empty");
     empty.style.display = staff.length === 0 ? "block" : "none";
-    const maxSales = Math.max(1, ...staff.map((s) => s.salesCount));
     tbody.innerHTML = staff
       .map(
-        (s, i) => `
+        (s, i) => {
+          const total = Math.max(1, s.manualOrdersLogged + s.customerScannedOrders);
+          const scannedPct = (s.customerScannedOrders / total) * 100;
+          const loggedPct = (s.manualOrdersLogged / total) * 100;
+          return `
         <tr>
           <td class="rank-cell">${i + 1}</td>
           <td>
             <div class="name-with-bar">
               <span>${escapeHtml(s.name)} <span style="color:var(--text-secondary); font-size:12px;">&middot; ${escapeHtml(s.locationName)}</span></span>
-              <div class="bar-track"><div class="bar-fill" style="width:${(s.salesCount / maxSales) * 100}%"></div></div>
+              <div class="stacked-bar-track">
+                <div class="stacked-bar-scanned" style="width:${scannedPct}%"></div>
+                <div class="stacked-bar-logged" style="width:${loggedPct}%"></div>
+              </div>
             </div>
           </td>
           <td class="balance">${s.salesCount}</td>
@@ -707,7 +741,8 @@
           <td class="balance">${s.points}</td>
           <td class="balance">${staffTierLabel(s.points)}</td>
         </tr>
-      `
+      `;
+        }
       )
       .join("");
   }
