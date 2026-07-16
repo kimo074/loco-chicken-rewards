@@ -5,8 +5,10 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
 import { Button } from "@/components/Button";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/api/client";
+import { BrandTitleStyle } from "@/constants/theme";
 
 export default function Login() {
   const { loginAsCustomer } = useAuth();
@@ -29,7 +31,8 @@ export default function Login() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
+      <BrandBackdrop />
+      <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
         Log in
       </ThemedText>
 

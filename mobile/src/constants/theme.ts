@@ -17,9 +17,9 @@ export const Colors = {
   },
   dark: {
     text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
+    background: '#17110D',
+    backgroundElement: '#241C15',
+    backgroundSelected: '#2F2318',
     textSecondary: '#B0B4BA',
   },
 } as const;
@@ -31,6 +31,14 @@ export const Brand = {
   redDark: '#A81B18',
   yellow: '#F6B90D',
   black: '#1A1A1A',
+} as const;
+
+export const BrandTitleStyle = {
+  color: Brand.red,
+  fontWeight: '900',
+  textShadowColor: 'rgba(246, 185, 13, 0.55)',
+  textShadowOffset: { width: 2, height: 2 },
+  textShadowRadius: 0,
 } as const;
 
 export const Fonts = Platform.select({

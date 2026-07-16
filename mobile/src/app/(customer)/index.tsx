@@ -4,6 +4,7 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
 import { LocoCoin } from "@/components/LocoCoin";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { useAuth } from "@/context/AuthContext";
 import { fetchRewards } from "@/api/rewards";
 
@@ -31,6 +32,7 @@ export default function CustomerHome() {
 
   return (
     <ThemedView style={styles.container}>
+      <BrandBackdrop />
       <ThemedText type="small" themeColor="textSecondary">
         {greeting()},
       </ThemedText>

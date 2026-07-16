@@ -4,15 +4,18 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
 import { LocoCoin } from "@/components/LocoCoin";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 
 export default function Welcome() {
   return (
     <ThemedView style={styles.container}>
+      <BrandBackdrop />
       <ThemedView style={styles.hero}>
         <ThemedView style={styles.badgeGlow}>
           <LocoCoin size={112} />
         </ThemedView>
         <ThemedText style={styles.title}>Loco Chicken</ThemedText>
+        <ThemedView style={styles.titleRule} />
         <ThemedText type="subtitle" themeColor="textSecondary" style={styles.subtitle}>
           Earn coins on every meal. Redeem them for free food.
         </ThemedText>
@@ -63,6 +66,13 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(246, 185, 13, 0.55)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 0,
+  },
+  titleRule: {
+    width: 64,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#F6B90D",
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 17,

@@ -9,6 +9,7 @@ import { Button } from "@/components/Button";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { LocoCoin } from "@/components/LocoCoin";
 import { ConfettiBurst } from "@/components/ConfettiBurst";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { useAuth } from "@/context/AuthContext";
 import { fetchRewards } from "@/api/rewards";
 import { createRedemption, RedemptionResult } from "@/api/redemptions";
@@ -16,6 +17,7 @@ import { ApiError } from "@/api/client";
 import { Reward } from "@/api/types";
 import { useCountdown } from "@/hooks/use-countdown";
 import { rewardIcon } from "@/lib/rewardIcon";
+import { BrandTitleStyle } from "@/constants/theme";
 
 export default function Rewards() {
   const { session, refreshSession } = useAuth();
@@ -67,6 +69,7 @@ export default function Rewards() {
   if (activeRedemption) {
     return (
       <ThemedView style={styles.container}>
+        <BrandBackdrop />
         <ThemedView style={styles.qrCard} type="backgroundElement">
           <ConfettiBurst burstKey={confettiKey} />
           {expired ? (
@@ -95,9 +98,11 @@ export default function Rewards() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
+      <BrandBackdrop />
+      <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
         Rewards
       </ThemedText>
+      <ThemedView style={styles.titleRule} />
       <ThemedView style={styles.balancePill}>
         <LocoCoin size={16} />
         <ThemedText style={styles.balancePillText}>
@@ -170,6 +175,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
+  },
+  titleRule: {
+    width: 56,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#F6B90D",
+    marginBottom: 4,
   },
   balancePill: {
     flexDirection: "row",

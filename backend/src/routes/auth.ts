@@ -63,6 +63,21 @@ authRouter.post(
   })
 );
 
+const staffAccessSchema = z.object({
+  pin: z.string().min(1),
+});
+
+authRouter.post(
+  "/staff/access",
+  loginLimiter,
+  asyncHandler(async (req, res) => {
+    const { pin } = staffAccessSchema.parse(req.body);
+    const expected = process.env.STAFF_ACCESS_PIN;
+    if (!expected || pin !== expected) throw new HttpError(401, "Incorrect PIN");
+    res.json({ ok: true });
+  })
+);
+
 const staffLoginSchema = z.object({
   staffUserId: z.string().min(1),
   pin: z.string().min(1),

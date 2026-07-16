@@ -14,6 +14,8 @@ services:
         sync: false
       - key: LIMITED_ADMIN_PASSWORD
         sync: false
+      - key: STAFF_ACCESS_PIN
+        sync: false
 
   - name: loco-chicken-web
     type: web

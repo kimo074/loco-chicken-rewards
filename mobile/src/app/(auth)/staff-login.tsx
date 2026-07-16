@@ -4,15 +4,22 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
 import { Button } from "@/components/Button";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/api/client";
-import { fetchLocations, fetchStaffNames } from "@/api/auth";
+import { fetchLocations, fetchStaffNames, verifyStaffAccessPin } from "@/api/auth";
 import { Location } from "@/api/types";
+import { BrandTitleStyle } from "@/constants/theme";
 
 type StaffOption = { id: string; name: string };
 
 export default function StaffLogin() {
   const { loginAsStaff } = useAuth();
+
+  const [accessGranted, setAccessGranted] = useState(false);
+  const [accessPin, setAccessPin] = useState("");
+  const [accessError, setAccessError] = useState<string | null>(null);
+  const [accessLoading, setAccessLoading] = useState(false);
 
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -24,10 +31,51 @@ export default function StaffLogin() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!accessGranted) return;
     fetchLocations()
       .then((res) => setLocations(res.locations))
       .catch(() => setError("Could not load locations. Is the server reachable?"));
-  }, []);
+  }, [accessGranted]);
+
+  async function onSubmitAccessPin() {
+    setAccessError(null);
+    setAccessLoading(true);
+    try {
+      await verifyStaffAccessPin(accessPin);
+      setAccessGranted(true);
+    } catch (err) {
+      setAccessError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setAccessLoading(false);
+    }
+  }
+
+  if (!accessGranted) {
+    return (
+      <ThemedView style={styles.container}>
+        <BrandBackdrop />
+        <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
+          Staff access
+        </ThemedText>
+        <ThemedText themeColor="textSecondary">Enter the staff access PIN to continue.</ThemedText>
+        <TextField
+          label="Access PIN"
+          value={accessPin}
+          onChangeText={setAccessPin}
+          secureTextEntry
+          keyboardType="number-pad"
+          maxLength={8}
+        />
+        {accessError ? <ThemedText style={styles.error}>{accessError}</ThemedText> : null}
+        <Button
+          title="Continue"
+          onPress={onSubmitAccessPin}
+          loading={accessLoading}
+          disabled={accessPin.length < 1}
+        />
+      </ThemedView>
+    );
+  }
 
   async function onSelectLocation(location: Location) {
     setError(null);
@@ -56,7 +104,8 @@ export default function StaffLogin() {
   if (!selectedLocation) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>
+        <BrandBackdrop />
+        <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
           Select your location
         </ThemedText>
         <ThemedView style={styles.list}>
@@ -77,7 +126,8 @@ export default function StaffLogin() {
   if (!selectedStaff) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>
+        <BrandBackdrop />
+        <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
           Who are you?
         </ThemedText>
         <ThemedText themeColor="textSecondary">{selectedLocation.name}</ThemedText>
@@ -94,7 +144,8 @@ export default function StaffLogin() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
+      <BrandBackdrop />
+      <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
         Enter your PIN
       </ThemedText>
       <ThemedText themeColor="textSecondary">{selectedStaff.name}</ThemedText>

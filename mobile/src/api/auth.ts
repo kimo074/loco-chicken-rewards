@@ -22,6 +22,13 @@ export function loginStaff(params: { staffUserId: string; pin: string }) {
   });
 }
 
+export function verifyStaffAccessPin(pin: string) {
+  return apiFetch<{ ok: true }>("/api/auth/staff/access", {
+    method: "POST",
+    body: { pin },
+  });
+}
+
 export function fetchLocations() {
   return apiFetch<{ locations: { id: string; name: string; address: string }[] }>("/api/locations");
 }

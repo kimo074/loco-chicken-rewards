@@ -4,9 +4,11 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
 import { LocoCoin } from "@/components/LocoCoin";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { useAuth } from "@/context/AuthContext";
 import { fetchMyTransactions } from "@/api/me";
 import { CoinTransaction } from "@/api/types";
+import { BrandTitleStyle } from "@/constants/theme";
 
 const TYPE_LABEL: Record<CoinTransaction["type"], string> = {
   EARN: "Earned",
@@ -44,9 +46,11 @@ export default function History() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
+      <BrandBackdrop />
+      <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
         Activity
       </ThemedText>
+      <ThemedView style={styles.titleRule} />
 
       {isLoading ? (
         <ThemedText themeColor="textSecondary">Loading…</ThemedText>
@@ -102,6 +106,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
+  },
+  titleRule: {
+    width: 56,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#F6B90D",
   },
   list: {
     gap: 10,
