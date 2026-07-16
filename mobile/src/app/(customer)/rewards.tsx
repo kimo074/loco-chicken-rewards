@@ -6,6 +6,7 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { LocoCoin } from "@/components/LocoCoin";
 import { useAuth } from "@/context/AuthContext";
 import { fetchRewards } from "@/api/rewards";
 import { createRedemption, RedemptionResult } from "@/api/redemptions";
@@ -85,9 +86,12 @@ export default function Rewards() {
       <ThemedText type="title" style={styles.title}>
         Rewards
       </ThemedText>
-      <ThemedText themeColor="textSecondary" style={styles.balanceHint}>
-        You have {customerSession.customer.coinBalance} coins
-      </ThemedText>
+      <ThemedView style={styles.balancePill}>
+        <LocoCoin size={16} />
+        <ThemedText style={styles.balancePillText}>
+          {customerSession.customer.coinBalance} coins available
+        </ThemedText>
+      </ThemedView>
       {redeemError ? <ThemedText style={styles.error}>{redeemError}</ThemedText> : null}
 
       {isLoading ? (
@@ -108,13 +112,16 @@ export default function Rewards() {
           renderItem={({ item }) => {
             const affordable = customerSession.customer.coinBalance >= item.costCoins;
             return (
-              <ThemedView style={styles.card} type="backgroundElement">
+              <ThemedView style={[styles.card, !affordable && styles.cardLocked]} type="backgroundElement">
+                <ThemedView style={styles.cardIconBadge}>
+                  <ThemedText style={styles.cardIconEmoji}>🎁</ThemedText>
+                </ThemedView>
                 <ThemedView type="backgroundElement" style={styles.cardBody}>
                   <ThemedText type="smallBold">{item.name}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
                     {item.description}
                   </ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">
+                  <ThemedText type="small" style={styles.cardCost}>
                     {item.costCoins} coins
                   </ThemedText>
                 </ThemedView>
@@ -152,8 +159,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
   },
-  balanceHint: {
+  balancePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 6,
+    backgroundColor: "rgba(214, 36, 31, 0.12)",
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     marginBottom: 16,
+  },
+  balancePillText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#D6241F",
   },
   list: {
     gap: 12,
@@ -163,8 +183,26 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
+  cardLocked: {
+    opacity: 0.55,
+  },
+  cardIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "rgba(246, 185, 13, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardIconEmoji: {
+    fontSize: 20,
+  },
   cardBody: {
     gap: 4,
+  },
+  cardCost: {
+    color: "#D6241F",
+    fontWeight: "700",
   },
   errorBox: {
     gap: 12,
@@ -180,6 +218,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
     minHeight: 280,
+    borderWidth: 1,
+    borderColor: "rgba(214, 36, 31, 0.35)",
+    shadowColor: "#D6241F",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 4,
   },
   shortCode: {
     letterSpacing: 4,

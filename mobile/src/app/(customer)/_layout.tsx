@@ -9,7 +9,7 @@ export default function CustomerLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#E85D2E",
+        tabBarActiveTintColor: "#D6241F",
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarStyle: { backgroundColor: theme.background, borderTopColor: theme.backgroundSelected },
       }}

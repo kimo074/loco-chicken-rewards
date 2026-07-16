@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
+import { LocoCoin } from "@/components/LocoCoin";
 import { useAuth } from "@/context/AuthContext";
 import { fetchMyTransactions } from "@/api/me";
 import { CoinTransaction } from "@/api/types";
@@ -11,6 +12,11 @@ const TYPE_LABEL: Record<CoinTransaction["type"], string> = {
   EARN: "Earned",
   REDEEM: "Redeemed",
   ADJUSTMENT: "Refunded",
+};
+
+const TYPE_EMOJI: Partial<Record<CoinTransaction["type"], string>> = {
+  REDEEM: "🎁",
+  ADJUSTMENT: "🔄",
 };
 
 function formatDate(iso: string) {
@@ -59,6 +65,13 @@ export default function History() {
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
           renderItem={({ item }) => (
             <ThemedView style={styles.row} type="backgroundElement">
+              <ThemedView style={styles.iconBadge}>
+                {item.type === "EARN" ? (
+                  <LocoCoin size={20} />
+                ) : (
+                  <ThemedText style={styles.iconEmoji}>{TYPE_EMOJI[item.type]}</ThemedText>
+                )}
+              </ThemedView>
               <ThemedView type="backgroundElement" style={styles.rowText}>
                 <ThemedText type="smallBold">{TYPE_LABEL[item.type]}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
@@ -98,10 +111,22 @@ const styles = StyleSheet.create({
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 12,
+  },
+  iconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(214, 36, 31, 0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconEmoji: {
+    fontSize: 18,
   },
   rowText: {
     gap: 2,
+    flex: 1,
   },
   errorBox: {
     gap: 12,

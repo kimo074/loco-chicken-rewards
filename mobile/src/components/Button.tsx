@@ -8,7 +8,7 @@ type ButtonProps = PressableProps & {
   loading?: boolean;
 };
 
-const ACCENT = "#E85D2E";
+const ACCENT = "#D6241F";
 
 export function Button({ title, variant = "primary", loading, disabled, style, ...rest }: ButtonProps) {
   const theme = useTheme();

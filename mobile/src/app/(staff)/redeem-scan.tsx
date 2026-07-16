@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   progressFill: {
     height: "100%",
     borderRadius: 6,
-    backgroundColor: "#E85D2E",
+    backgroundColor: "#F6B90D",
   },
   lockedCard: {
     borderRadius: 16,
