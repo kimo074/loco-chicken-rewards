@@ -44,12 +44,16 @@ export default function Rewards() {
 
   async function confirmRedeem() {
     if (!pendingReward) return;
+    // Play immediately, synchronously within the tap gesture — iOS Safari and
+    // Android Chrome block audio.play() once it's past an `await`, since the
+    // browser no longer considers it tied to the user's tap.
+    redeemSound.seekTo(0);
+    redeemSound.play();
     setRedeeming(true);
     try {
       const result = await createRedemption(customerSession.token, pendingReward.id);
       setActiveRedemption(result);
       setPendingReward(null);
-      redeemSound.seekTo(0).finally(() => redeemSound.play());
       setConfettiKey((key) => key + 1);
       await refreshSession();
     } catch (err) {
