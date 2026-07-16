@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FlatList, RefreshControl, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import { useAudioPlayer } from "expo-audio";
 import { useQuery } from "@tanstack/react-query";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
@@ -20,6 +21,7 @@ export default function Rewards() {
   const [pendingReward, setPendingReward] = useState<Reward | null>(null);
   const [redeeming, setRedeeming] = useState(false);
   const [redeemError, setRedeemError] = useState<string | null>(null);
+  const redeemSound = useAudioPlayer(require("../../../assets/sounds/redeem-cluck.wav"));
 
   const { data, isLoading, isRefetching, error, refetch } = useQuery({
     queryKey: ["rewards"],
@@ -44,6 +46,7 @@ export default function Rewards() {
       const result = await createRedemption(customerSession.token, pendingReward.id);
       setActiveRedemption(result);
       setPendingReward(null);
+      redeemSound.seekTo(0).finally(() => redeemSound.play());
       await refreshSession();
     } catch (err) {
       setRedeemError(err instanceof ApiError ? err.message : "Please try again.");

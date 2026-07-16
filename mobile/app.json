@@ -39,7 +39,8 @@
         {
           "cameraPermission": "Loco Chicken uses your camera to scan the code at the register so we can add your coins."
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,
