@@ -11,7 +11,10 @@ export default function CustomerLayout() {
         headerShown: false,
         tabBarActiveTintColor: "#D6241F",
         tabBarInactiveTintColor: theme.textSecondary,
-        tabBarStyle: { backgroundColor: theme.background, borderTopColor: theme.backgroundSelected },
+        tabBarStyle: {
+          backgroundColor: "rgba(23, 17, 13, 0.82)",
+          borderTopColor: "rgba(255, 255, 255, 0.14)",
+        },
       }}
     >
       <Tabs.Screen

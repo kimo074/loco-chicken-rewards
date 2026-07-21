@@ -70,7 +70,7 @@ export default function Rewards() {
     return (
       <ThemedView style={styles.container}>
         <BrandBackdrop />
-        <ThemedView style={styles.qrCard} type="backgroundElement">
+        <ThemedView style={styles.qrCard}>
           <ConfettiBurst burstKey={confettiKey} />
           {expired ? (
             <ThemedText type="subtitle" style={styles.expiredText}>
@@ -88,7 +88,7 @@ export default function Rewards() {
             </>
           )}
         </ThemedView>
-        <ThemedText type="subtitle" style={styles.rewardName}>
+        <ThemedText type="subtitle" style={[styles.rewardName, styles.mutedInk]}>
           {rewardIcon(activeRedemption.reward)} {activeRedemption.reward.name}
         </ThemedText>
         <Button title="Done" onPress={() => setActiveRedemption(null)} />
@@ -112,14 +112,14 @@ export default function Rewards() {
       {redeemError ? <ThemedText style={styles.error}>{redeemError}</ThemedText> : null}
 
       {isLoading ? (
-        <ThemedText themeColor="textSecondary">Loading rewards…</ThemedText>
+        <ThemedText style={styles.mutedInk}>Loading rewards…</ThemedText>
       ) : error ? (
         <ThemedView style={styles.errorBox}>
           <ThemedText style={styles.error}>Could not load rewards.</ThemedText>
-          <Button title="Retry" variant="secondary" onPress={() => refetch()} />
+          <Button title="Retry" variant="secondary" onPress={() => refetch()} style={styles.glassButton} />
         </ThemedView>
       ) : !data || data.length === 0 ? (
-        <ThemedText themeColor="textSecondary">No rewards available right now.</ThemedText>
+        <ThemedText style={styles.mutedInk}>No rewards available right now.</ThemedText>
       ) : (
         <FlatList
           data={data}
@@ -129,11 +129,11 @@ export default function Rewards() {
           renderItem={({ item }) => {
             const affordable = customerSession.customer.coinBalance >= item.costCoins;
             return (
-              <ThemedView style={[styles.card, !affordable && styles.cardLocked]} type="backgroundElement">
+              <ThemedView style={[styles.card, !affordable && styles.cardLocked]}>
                 <ThemedView style={styles.cardIconBadge}>
                   <ThemedText style={styles.cardIconEmoji}>{rewardIcon(item)}</ThemedText>
                 </ThemedView>
-                <ThemedView type="backgroundElement" style={styles.cardBody}>
+                <ThemedView style={styles.cardBody}>
                   <ThemedText type="smallBold">{item.name}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
                     {item.description}
@@ -206,6 +206,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     gap: 12,
+    backgroundColor: "rgba(36, 28, 21, 0.62)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.16)",
   },
   cardLocked: {
     opacity: 0.55,
@@ -223,6 +226,7 @@ const styles = StyleSheet.create({
   },
   cardBody: {
     gap: 4,
+    backgroundColor: "transparent",
   },
   cardCost: {
     color: "#D6241F",
@@ -236,6 +240,14 @@ const styles = StyleSheet.create({
   error: {
     color: "#C4392B",
   },
+  mutedInk: {
+    color: "#4A1B22",
+  },
+  glassButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.35)",
+  },
   qrCard: {
     borderRadius: 20,
     padding: 32,
@@ -243,8 +255,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
     minHeight: 280,
+    backgroundColor: "rgba(36, 28, 21, 0.62)",
     borderWidth: 1,
-    borderColor: "rgba(214, 36, 31, 0.35)",
+    borderColor: "rgba(255, 255, 255, 0.16)",
     shadowColor: "#D6241F",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,

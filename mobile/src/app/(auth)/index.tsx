@@ -23,13 +23,13 @@ export default function Welcome() {
 
       <ThemedView style={styles.actions}>
         <Link href="/login" asChild>
-          <Button title="Log in" />
+          <Button title="Log in" style={styles.primaryButton} />
         </Link>
         <Link href="/signup" asChild>
-          <Button title="Create an account" variant="secondary" />
+          <Button title="Create an account" variant="secondary" style={styles.glassButton} />
         </Link>
         <Link href="/staff-login" asChild>
-          <Button title="I work here" variant="secondary" />
+          <Button title="I work here" variant="secondary" style={styles.glassButton} />
         </Link>
       </ThemedView>
     </ThemedView>
@@ -81,9 +81,22 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlign: "center",
     maxWidth: 320,
+    color: "#4A1B22",
+    textShadowColor: "rgba(255, 255, 255, 0.35)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
   },
   actions: {
     gap: 12,
     backgroundColor: "transparent",
+  },
+  primaryButton: {
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
+  },
+  glassButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.35)",
   },
 });

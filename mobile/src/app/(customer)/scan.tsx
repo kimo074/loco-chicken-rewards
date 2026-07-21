@@ -5,6 +5,7 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
 import { WebBarcodeScanner } from "@/components/WebBarcodeScanner";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { useAuth } from "@/context/AuthContext";
 import { claimSale } from "@/api/sales";
 import { ApiError } from "@/api/client";
@@ -57,16 +58,21 @@ export default function ScanToEarn() {
   }
 
   if (!permission && Platform.OS !== "web") {
-    return <ThemedView style={styles.container} />;
+    return (
+      <ThemedView style={styles.container}>
+        <BrandBackdrop />
+      </ThemedView>
+    );
   }
 
   if (Platform.OS !== "web" && !permission?.granted) {
     return (
       <ThemedView style={[styles.container, styles.centered]}>
+        <BrandBackdrop />
         <ThemedText type="subtitle" style={styles.permissionTitle}>
           Camera access needed
         </ThemedText>
-        <ThemedText themeColor="textSecondary" style={styles.permissionBody}>
+        <ThemedText style={[styles.permissionBody, styles.mutedInk]}>
           We use your camera to scan the code shown at the register so we can add your coins.
         </ThemedText>
         <Button title="Grant camera access" onPress={requestPermission} />
@@ -77,22 +83,21 @@ export default function ScanToEarn() {
   if (claimState.status !== "idle") {
     return (
       <ThemedView style={[styles.container, styles.centered]}>
+        <BrandBackdrop />
         {claimState.status === "success" ? (
           <>
             <ThemedText type="title" style={styles.resultEmoji}>
               🎉
             </ThemedText>
             <ThemedText type="subtitle">+{claimState.coinsAwarded} coins</ThemedText>
-            <ThemedText themeColor="textSecondary">Added to your balance</ThemedText>
+            <ThemedText style={styles.mutedInk}>Added to your balance</ThemedText>
           </>
         ) : (
           <>
             <ThemedText type="subtitle" style={styles.errorTitle}>
               Couldn&apos;t add coins
             </ThemedText>
-            <ThemedText themeColor="textSecondary" style={styles.permissionBody}>
-              {claimState.message}
-            </ThemedText>
+            <ThemedText style={[styles.permissionBody, styles.mutedInk]}>{claimState.message}</ThemedText>
           </>
         )}
         <Button title="Scan again" onPress={onScanAgain} />
@@ -141,6 +146,9 @@ const styles = StyleSheet.create({
   permissionBody: {
     textAlign: "center",
     lineHeight: 22,
+  },
+  mutedInk: {
+    color: "#4A1B22",
   },
   resultEmoji: {
     fontSize: 56,

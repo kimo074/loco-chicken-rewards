@@ -53,14 +53,14 @@ export default function History() {
       <ThemedView style={styles.titleRule} />
 
       {isLoading ? (
-        <ThemedText themeColor="textSecondary">Loading…</ThemedText>
+        <ThemedText style={styles.mutedInk}>Loading…</ThemedText>
       ) : error ? (
         <ThemedView style={styles.errorBox}>
           <ThemedText style={styles.error}>Could not load your activity.</ThemedText>
-          <Button title="Retry" variant="secondary" onPress={() => refetch()} />
+          <Button title="Retry" variant="secondary" onPress={() => refetch()} style={styles.glassButton} />
         </ThemedView>
       ) : !data || data.length === 0 ? (
-        <ThemedText themeColor="textSecondary">No activity yet. Buy a meal to earn your first coins.</ThemedText>
+        <ThemedText style={styles.mutedInk}>No activity yet. Buy a meal to earn your first coins.</ThemedText>
       ) : (
         <FlatList
           data={data}
@@ -68,7 +68,7 @@ export default function History() {
           contentContainerStyle={styles.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
           renderItem={({ item }) => (
-            <ThemedView style={styles.row} type="backgroundElement">
+            <ThemedView style={styles.row}>
               <ThemedView style={styles.iconBadge}>
                 {item.type === "EARN" ? (
                   <LocoCoin size={20} />
@@ -76,7 +76,7 @@ export default function History() {
                   <ThemedText style={styles.iconEmoji}>{TYPE_EMOJI[item.type]}</ThemedText>
                 )}
               </ThemedView>
-              <ThemedView type="backgroundElement" style={styles.rowText}>
+              <ThemedView style={styles.rowText}>
                 <ThemedText type="smallBold">{TYPE_LABEL[item.type]}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {formatDate(item.createdAt)}
@@ -122,6 +122,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    backgroundColor: "rgba(36, 28, 21, 0.62)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.16)",
   },
   iconBadge: {
     width: 40,
@@ -137,6 +140,7 @@ const styles = StyleSheet.create({
   rowText: {
     gap: 2,
     flex: 1,
+    backgroundColor: "transparent",
   },
   errorBox: {
     gap: 12,
@@ -145,6 +149,14 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "#C4392B",
+  },
+  mutedInk: {
+    color: "#4A1B22",
+  },
+  glassButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.35)",
   },
   positive: {
     color: "#3FA34D",

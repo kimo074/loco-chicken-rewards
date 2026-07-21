@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { StyleSheet } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import QRCode from "react-native-qrcode-svg";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
 import { Button } from "@/components/Button";
 import { useAuth } from "@/context/AuthContext";
-import { createSale, SaleCode } from "@/api/sales";
+import { createSale, scanReceipt, SaleCode } from "@/api/sales";
 import { ApiError } from "@/api/client";
 import { useCountdown } from "@/hooks/use-countdown";
 
@@ -22,6 +23,7 @@ export default function NewSale() {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [saleCode, setSaleCode] = useState<SaleCode | null>(null);
 
   const { label: countdownLabel, expired } = useCountdown(saleCode?.expiresAt ?? null);
@@ -44,6 +46,33 @@ export default function NewSale() {
       setError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function onScanReceipt() {
+    setError(null);
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      setError("Camera access is needed to scan a receipt.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.5 });
+    if (result.canceled || !result.assets[0]?.base64) return;
+
+    setScanning(true);
+    try {
+      const mediaType = result.assets[0].mimeType === "image/png" ? "image/png" : "image/jpeg";
+      const { amountCents } = await scanReceipt(staffSession.token, result.assets[0].base64, mediaType);
+      if (amountCents) {
+        setAmount((amountCents / 100).toFixed(2));
+      } else {
+        setError("Couldn't read the amount from that receipt. Please enter it manually.");
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't scan the receipt. Please enter the amount manually.");
+    } finally {
+      setScanning(false);
     }
   }
 
@@ -97,6 +126,7 @@ export default function NewSale() {
         keyboardType="decimal-pad"
         placeholder="0.00"
       />
+      <Button title="Scan receipt" variant="secondary" onPress={onScanReceipt} loading={scanning} />
       {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
       <Button title="Generate code" onPress={onCreateSale} loading={loading} disabled={!amount} />
     </ThemedView>

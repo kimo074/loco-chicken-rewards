@@ -22,3 +22,11 @@ export function claimSale(token: string, saleToken: string) {
     body: { token: saleToken },
   });
 }
+
+export function scanReceipt(token: string, imageBase64: string, mediaType: "image/jpeg" | "image/png") {
+  return apiFetch<{ amountCents: number | null }>("/api/staff/sales/scan-receipt", {
+    method: "POST",
+    token,
+    body: { imageBase64, mediaType },
+  });
+}

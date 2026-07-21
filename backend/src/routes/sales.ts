@@ -4,10 +4,12 @@ import rateLimit from "express-rate-limit";
 import { requireCustomer, requireStaff } from "../middleware/auth";
 import { asyncHandler, HttpError } from "../middleware/errorHandler";
 import { createSaleCode, claimSaleCode } from "../services/sales";
+import { scanReceiptAmount } from "../lib/receiptScan";
 
 export const salesRouter = Router();
 
 const claimLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30 });
+const scanLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30 });
 
 const createSaleSchema = z.object({
   amountCents: z.number().int().positive(),
@@ -32,6 +34,22 @@ salesRouter.post(
       amountCents: saleCode.amountCents,
       expiresAt: saleCode.expiresAt,
     });
+  })
+);
+
+const scanReceiptSchema = z.object({
+  imageBase64: z.string().min(1),
+  mediaType: z.enum(["image/jpeg", "image/png"]),
+});
+
+salesRouter.post(
+  "/staff/sales/scan-receipt",
+  requireStaff,
+  scanLimiter,
+  asyncHandler(async (req, res) => {
+    const { imageBase64, mediaType } = scanReceiptSchema.parse(req.body);
+    const amountCents = await scanReceiptAmount(imageBase64, mediaType);
+    res.json({ amountCents });
   })
 );
 
