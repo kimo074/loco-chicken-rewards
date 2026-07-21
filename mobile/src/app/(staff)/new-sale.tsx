@@ -6,6 +6,8 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
 import { Button } from "@/components/Button";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
+import { GlossyButton } from "@/components/GlossyButton";
 import { useAuth } from "@/context/AuthContext";
 import { createSale, scanReceipt, SaleCode } from "@/api/sales";
 import { ApiError } from "@/api/client";
@@ -85,7 +87,8 @@ export default function NewSale() {
   if (saleCode) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedView style={styles.qrCard} type="backgroundElement">
+        <BrandBackdrop />
+        <ThemedView style={styles.qrCard}>
           {expired ? (
             <ThemedText type="subtitle" style={styles.expiredText}>
               This code has expired
@@ -102,7 +105,7 @@ export default function NewSale() {
 
         <ThemedView style={styles.summary}>
           <ThemedText type="subtitle">€{(saleCode.amountCents / 100).toFixed(2)}</ThemedText>
-          <ThemedText themeColor="textSecondary">{saleCode.coinsAwarded} coins for the customer</ThemedText>
+          <ThemedText style={styles.mutedInk}>{saleCode.coinsAwarded} coins for the customer</ThemedText>
         </ThemedView>
 
         <Button title="Start another sale" onPress={onReset} />
@@ -112,21 +115,24 @@ export default function NewSale() {
 
   return (
     <ThemedView style={styles.container}>
+      <BrandBackdrop />
       <ThemedText type="title" style={styles.title}>
         New sale
       </ThemedText>
-      <ThemedText themeColor="textSecondary">
+      <ThemedText style={styles.mutedInk}>
         Enter the amount the customer paid. They'll scan the code to earn their coins.
       </ThemedText>
 
       <TextField
         label="Amount (€)"
+        labelStyle={styles.mutedInk}
+        style={styles.glassInput}
         value={amount}
         onChangeText={setAmount}
         keyboardType="decimal-pad"
         placeholder="0.00"
       />
-      <Button title="Scan receipt" variant="secondary" onPress={onScanReceipt} loading={scanning} />
+      <GlossyButton title="Take a picture of the receipt" onPress={onScanReceipt} loading={scanning} />
       {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
       <Button title="Generate code" onPress={onCreateSale} loading={loading} disabled={!amount} />
     </ThemedView>
@@ -143,6 +149,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
   },
+  mutedInk: {
+    color: "#3A1218",
+  },
+  glassInput: {
+    backgroundColor: "rgba(36, 28, 21, 0.62)",
+    borderColor: "rgba(255, 255, 255, 0.16)",
+  },
   error: {
     color: "#C4392B",
   },
@@ -153,6 +166,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 16,
     minHeight: 280,
+    backgroundColor: "rgba(36, 28, 21, 0.62)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.16)",
   },
   expiresIn: {
     marginTop: 4,

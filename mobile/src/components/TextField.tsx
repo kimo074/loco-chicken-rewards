@@ -1,17 +1,18 @@
-import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
+import { StyleSheet, TextInput, TextInputProps, TextStyle, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { useTheme } from "@/hooks/use-theme";
 
 type TextFieldProps = TextInputProps & {
   label: string;
+  labelStyle?: TextStyle;
 };
 
-export function TextField({ label, style, ...rest }: TextFieldProps) {
+export function TextField({ label, labelStyle, style, ...rest }: TextFieldProps) {
   const theme = useTheme();
 
   return (
     <View style={styles.wrapper}>
-      <ThemedText type="small" themeColor="textSecondary">
+      <ThemedText type="small" themeColor="textSecondary" style={labelStyle}>
         {label}
       </ThemedText>
       <TextInput

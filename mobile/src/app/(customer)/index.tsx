@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
-import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
+import { StyleSheet } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { LocoCoin } from "@/components/LocoCoin";
 import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { ChickenMood, randomMood } from "@/components/ChickenMood";
+import { GlossyButton } from "@/components/GlossyButton";
 import { useAuth } from "@/context/AuthContext";
 import { fetchRewards } from "@/api/rewards";
 
@@ -17,27 +17,6 @@ function greeting() {
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
-}
-
-function GlossyBlackButton({ title, onPress }: { title: string; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={(state) => [styles.glossyButton, { opacity: state.pressed ? 0.85 : 1 }]}
-    >
-      <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
-        <Defs>
-          <LinearGradient id="glossy-black" x1="0%" y1="0%" x2="0%" y2="100%">
-            <Stop offset="0%" stopColor="#3A322C" />
-            <Stop offset="12%" stopColor="#1C1712" />
-            <Stop offset="100%" stopColor="#080605" />
-          </LinearGradient>
-        </Defs>
-        <Rect x={0} y={0} width="100%" height="100%" rx={12} fill="url(#glossy-black)" />
-      </Svg>
-      <ThemedText style={styles.glossyButtonText}>{title}</ThemedText>
-    </Pressable>
-  );
 }
 
 export default function CustomerHome() {
@@ -108,7 +87,7 @@ export default function CustomerHome() {
       ) : null}
 
       <ThemedView style={styles.logoutButton}>
-        <GlossyBlackButton title="Log out" onPress={logout} />
+        <GlossyButton title="Log out" onPress={logout} />
       </ThemedView>
     </ThemedView>
   );
@@ -195,23 +174,5 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: "auto",
-  },
-  glossyButton: {
-    height: 50,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.18)",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 14,
-    elevation: 6,
-  },
-  glossyButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
   },
 });
