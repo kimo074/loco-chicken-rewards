@@ -15,7 +15,7 @@ import { analyticsRouter } from "./routes/analytics";
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "8mb" }));
+app.use(express.json());
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "expo-router";
 import { StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
@@ -11,6 +12,7 @@ import { ApiError } from "@/api/client";
 import { BrandTitleStyle } from "@/constants/theme";
 
 export default function Signup() {
+  const { t } = useTranslation();
   const { signup } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,7 +26,7 @@ export default function Signup() {
     try {
       await signup({ name: name.trim(), email: email.trim().toLowerCase(), password });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof ApiError ? err.message : t("common.somethingWrong"));
     } finally {
       setLoading(false);
     }
@@ -34,13 +36,13 @@ export default function Signup() {
     <ThemedView style={styles.container}>
       <BrandBackdrop />
       <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
-        Create account
+        {t("signup.title")}
       </ThemedText>
 
       <ThemedView style={styles.form}>
-        <TextField label="Name" value={name} onChangeText={setName} autoComplete="name" />
+        <TextField label={t("signup.nameLabel")} value={name} onChangeText={setName} autoComplete="name" />
         <TextField
-          label="Email"
+          label={t("signup.emailLabel")}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -48,7 +50,7 @@ export default function Signup() {
           autoComplete="email"
         />
         <TextField
-          label="Password"
+          label={t("signup.passwordLabel")}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -60,19 +62,19 @@ export default function Signup() {
           </ThemedText>
         ) : null}
         <Button
-          title="Sign up"
+          title={t("signup.submit")}
           onPress={onSubmit}
           loading={loading}
           disabled={!name || !email || password.length < 8}
         />
         <ThemedText type="small" themeColor="textSecondary">
-          Password must be at least 8 characters.
+          {t("signup.passwordHint")}
         </ThemedText>
       </ThemedView>
 
       <Link href="/login">
         <ThemedText type="link" themeColor="textSecondary">
-          Already have an account? Log in
+          {t("signup.haveAccount")}
         </ThemedText>
       </Link>
     </ThemedView>

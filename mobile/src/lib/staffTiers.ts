@@ -1,10 +1,10 @@
-export type StaffTier = { name: string; emoji: string; threshold: number };
+export type StaffTier = { name: string; nameKey: string; emoji: string; threshold: number };
 
 export const STAFF_TIERS: StaffTier[] = [
-  { name: "Bronze", emoji: "🥉", threshold: 5000 },
-  { name: "Silver", emoji: "🥈", threshold: 10000 },
-  { name: "Gold", emoji: "🥇", threshold: 100000 },
-  { name: "Master", emoji: "🏆", threshold: 1000000 },
+  { name: "Bronze", nameKey: "tiers.bronze", emoji: "🥉", threshold: 5000 },
+  { name: "Silver", nameKey: "tiers.silver", emoji: "🥈", threshold: 10000 },
+  { name: "Gold", nameKey: "tiers.gold", emoji: "🥇", threshold: 100000 },
+  { name: "Master", nameKey: "tiers.master", emoji: "🏆", threshold: 1000000 },
 ];
 
 export function getStaffTierProgress(points: number): {

@@ -3,6 +3,7 @@ import { FlatList, RefreshControl, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useAudioPlayer } from "expo-audio";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
@@ -20,6 +21,7 @@ import { rewardIcon } from "@/lib/rewardIcon";
 import { BrandTitleStyle } from "@/constants/theme";
 
 export default function Rewards() {
+  const { t } = useTranslation();
   const { session, refreshSession } = useAuth();
   const [activeRedemption, setActiveRedemption] = useState<RedemptionResult | null>(null);
   const [pendingReward, setPendingReward] = useState<Reward | null>(null);
@@ -59,7 +61,7 @@ export default function Rewards() {
       setConfettiKey((key) => key + 1);
       await refreshSession();
     } catch (err) {
-      setRedeemError(err instanceof ApiError ? err.message : "Please try again.");
+      setRedeemError(err instanceof ApiError ? err.message : t("common.somethingWrong"));
       setPendingReward(null);
     } finally {
       setRedeeming(false);
@@ -74,7 +76,7 @@ export default function Rewards() {
           <ConfettiBurst burstKey={confettiKey} />
           {expired ? (
             <ThemedText type="subtitle" style={styles.expiredText}>
-              This code has expired
+              {t("rewards.codeExpired")}
             </ThemedText>
           ) : (
             <>
@@ -83,7 +85,7 @@ export default function Rewards() {
                 {activeRedemption.shortCode}
               </ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                Show this to staff · expires in {countdownLabel}
+                {t("rewards.showToStaff", { time: countdownLabel })}
               </ThemedText>
             </>
           )}
@@ -91,7 +93,7 @@ export default function Rewards() {
         <ThemedText type="subtitle" style={[styles.rewardName, styles.mutedInk]}>
           {rewardIcon(activeRedemption.reward)} {activeRedemption.reward.name}
         </ThemedText>
-        <Button title="Done" onPress={() => setActiveRedemption(null)} />
+        <Button title={t("rewards.done")} onPress={() => setActiveRedemption(null)} />
       </ThemedView>
     );
   }
@@ -100,26 +102,26 @@ export default function Rewards() {
     <ThemedView style={styles.container}>
       <BrandBackdrop />
       <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
-        Rewards
+        {t("rewards.title")}
       </ThemedText>
       <ThemedView style={styles.titleRule} />
       <ThemedView style={styles.balancePill}>
         <LocoCoin size={16} />
         <ThemedText style={styles.balancePillText}>
-          {customerSession.customer.coinBalance} coins available
+          {t("rewards.balanceAvailable", { count: customerSession.customer.coinBalance })}
         </ThemedText>
       </ThemedView>
       {redeemError ? <ThemedText style={styles.error}>{redeemError}</ThemedText> : null}
 
       {isLoading ? (
-        <ThemedText style={styles.mutedInk}>Loading rewards…</ThemedText>
+        <ThemedText style={styles.mutedInk}>{t("rewards.loading")}</ThemedText>
       ) : error ? (
         <ThemedView style={styles.errorBox}>
-          <ThemedText style={styles.error}>Could not load rewards.</ThemedText>
-          <Button title="Retry" variant="secondary" onPress={() => refetch()} style={styles.glassButton} />
+          <ThemedText style={styles.error}>{t("rewards.loadError")}</ThemedText>
+          <Button title={t("common.retry")} variant="secondary" onPress={() => refetch()} style={styles.glassButton} />
         </ThemedView>
       ) : !data || data.length === 0 ? (
-        <ThemedText style={styles.mutedInk}>No rewards available right now.</ThemedText>
+        <ThemedText style={styles.mutedInk}>{t("rewards.empty")}</ThemedText>
       ) : (
         <FlatList
           data={data}
@@ -139,11 +141,11 @@ export default function Rewards() {
                     {item.description}
                   </ThemedText>
                   <ThemedText type="small" style={styles.cardCost}>
-                    {item.costCoins} coins
+                    {t("rewards.costCoins", { count: item.costCoins })}
                   </ThemedText>
                 </ThemedView>
                 <Button
-                  title={affordable ? "Redeem" : "Not enough coins"}
+                  title={affordable ? t("rewards.redeemButton") : t("rewards.notEnough")}
                   onPress={() => onRedeem(item)}
                   disabled={!affordable}
                 />
@@ -155,9 +157,13 @@ export default function Rewards() {
 
       <ConfirmModal
         visible={pendingReward !== null}
-        title="Redeem reward?"
-        message={pendingReward ? `This will use ${pendingReward.costCoins} coins for "${pendingReward.name}".` : ""}
-        confirmLabel="Redeem"
+        title={t("rewards.redeemModalTitle")}
+        message={
+          pendingReward
+            ? t("rewards.redeemModalMessage", { cost: pendingReward.costCoins, name: pendingReward.name })
+            : ""
+        }
+        confirmLabel={t("rewards.redeemConfirm")}
         onConfirm={confirmRedeem}
         onCancel={() => setPendingReward(null)}
         confirming={redeeming}

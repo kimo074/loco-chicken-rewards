@@ -1,5 +1,6 @@
 import { FlatList, RefreshControl, StyleSheet } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
@@ -10,19 +11,13 @@ import { fetchMyTransactions } from "@/api/me";
 import { CoinTransaction } from "@/api/types";
 import { BrandTitleStyle } from "@/constants/theme";
 
-const TYPE_LABEL: Record<CoinTransaction["type"], string> = {
-  EARN: "Earned",
-  REDEEM: "Redeemed",
-  ADJUSTMENT: "Refunded",
-};
-
 const TYPE_EMOJI: Partial<Record<CoinTransaction["type"], string>> = {
   REDEEM: "🎁",
   ADJUSTMENT: "🔄",
 };
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString(undefined, {
+function formatDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleString(locale, {
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -31,7 +26,14 @@ function formatDate(iso: string) {
 }
 
 export default function History() {
+  const { t, i18n } = useTranslation();
   const { session } = useAuth();
+
+  const typeLabel: Record<CoinTransaction["type"], string> = {
+    EARN: t("history.earned"),
+    REDEEM: t("history.redeemed"),
+    ADJUSTMENT: t("history.refunded"),
+  };
 
   const { data, isLoading, isRefetching, error, refetch } = useQuery({
     queryKey: ["transactions"],
@@ -48,19 +50,19 @@ export default function History() {
     <ThemedView style={styles.container}>
       <BrandBackdrop />
       <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
-        Activity
+        {t("history.title")}
       </ThemedText>
       <ThemedView style={styles.titleRule} />
 
       {isLoading ? (
-        <ThemedText style={styles.mutedInk}>Loading…</ThemedText>
+        <ThemedText style={styles.mutedInk}>{t("history.loading")}</ThemedText>
       ) : error ? (
         <ThemedView style={styles.errorBox}>
-          <ThemedText style={styles.error}>Could not load your activity.</ThemedText>
-          <Button title="Retry" variant="secondary" onPress={() => refetch()} style={styles.glassButton} />
+          <ThemedText style={styles.error}>{t("history.loadError")}</ThemedText>
+          <Button title={t("common.retry")} variant="secondary" onPress={() => refetch()} style={styles.glassButton} />
         </ThemedView>
       ) : !data || data.length === 0 ? (
-        <ThemedText style={styles.mutedInk}>No activity yet. Buy a meal to earn your first coins.</ThemedText>
+        <ThemedText style={styles.mutedInk}>{t("history.empty")}</ThemedText>
       ) : (
         <FlatList
           data={data}
@@ -77,9 +79,9 @@ export default function History() {
                 )}
               </ThemedView>
               <ThemedView style={styles.rowText}>
-                <ThemedText type="smallBold">{TYPE_LABEL[item.type]}</ThemedText>
+                <ThemedText type="smallBold">{typeLabel[item.type]}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  {formatDate(item.createdAt)}
+                  {formatDate(item.createdAt, i18n.language)}
                 </ThemedText>
               </ThemedView>
               <ThemedText

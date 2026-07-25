@@ -1,4 +1,5 @@
 import { Modal, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
@@ -18,12 +19,16 @@ export function ConfirmModal({
   visible,
   title,
   message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   confirming,
 }: ConfirmModalProps) {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t("common.confirm");
+  const resolvedCancelLabel = cancelLabel ?? t("common.cancel");
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
@@ -35,8 +40,8 @@ export function ConfirmModal({
             {message}
           </ThemedText>
           <View style={styles.actions}>
-            <Button title={cancelLabel} variant="secondary" onPress={onCancel} disabled={confirming} />
-            <Button title={confirmLabel} onPress={onConfirm} loading={confirming} />
+            <Button title={resolvedCancelLabel} variant="secondary" onPress={onCancel} disabled={confirming} />
+            <Button title={resolvedConfirmLabel} onPress={onConfirm} loading={confirming} />
           </View>
         </ThemedView>
       </View>

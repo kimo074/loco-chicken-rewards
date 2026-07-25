@@ -1,9 +1,11 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/use-theme";
 
 export default function StaffLayout() {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Tabs
@@ -16,15 +18,24 @@ export default function StaffLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: "Home", tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} /> }}
+        options={{
+          title: t("staffTabs.home"),
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="new-sale"
-        options={{ title: "New Sale", tabBarIcon: ({ color, size }) => <Ionicons name="add-circle" color={color} size={size} /> }}
+        options={{
+          title: t("staffTabs.newSale"),
+          tabBarIcon: ({ color, size }) => <Ionicons name="add-circle" color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="redeem-scan"
-        options={{ title: "Rewards", tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color} size={size} /> }}
+        options={{
+          title: t("staffTabs.rewards"),
+          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color} size={size} />,
+        }}
       />
     </Tabs>
   );

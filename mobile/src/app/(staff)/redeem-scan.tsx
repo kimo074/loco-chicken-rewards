@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
@@ -10,6 +11,7 @@ import { ApiError } from "@/api/client";
 import { STAFF_TIERS, getStaffTierProgress } from "@/lib/staffTiers";
 
 export default function RedeemScan() {
+  const { t } = useTranslation();
   const { session, refreshSession } = useAuth();
   const [shiftOrders, setShiftOrders] = useState("");
   const [loggingShift, setLoggingShift] = useState(false);
@@ -22,7 +24,7 @@ export default function RedeemScan() {
   const { current, next } = getStaffTierProgress(points);
   const previousThreshold = current?.threshold ?? 0;
   const progressFraction = next ? Math.min(1, Math.max(0, (points - previousThreshold) / (next.threshold - previousThreshold))) : 1;
-  const nextIndex = next ? STAFF_TIERS.findIndex((t) => t.name === next.name) : -1;
+  const nextIndex = next ? STAFF_TIERS.findIndex((tier) => tier.name === next.name) : -1;
   const afterNext = nextIndex >= 0 && nextIndex + 1 < STAFF_TIERS.length ? STAFF_TIERS[nextIndex + 1] : null;
 
   async function onLogShiftOrders() {
@@ -32,11 +34,11 @@ export default function RedeemScan() {
     setShiftLogMessage(null);
     try {
       const { points } = await logShiftOrders(staffSession.token, orders);
-      setShiftLogMessage(`Added! Your total is now ${points} points.`);
+      setShiftLogMessage(t("redeemScan.addedPoints", { points }));
       setShiftOrders("");
       await refreshSession();
     } catch (err) {
-      setShiftLogMessage(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      setShiftLogMessage(err instanceof ApiError ? err.message : t("common.somethingWrong"));
     } finally {
       setLoggingShift(false);
     }
@@ -46,32 +48,32 @@ export default function RedeemScan() {
     <ThemedView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <ThemedText type="title" style={styles.title}>
-          Rewards
+          {t("redeemScan.title")}
         </ThemedText>
 
         <ThemedView style={styles.comingSoonBanner} type="backgroundElement">
           <ThemedText style={styles.bannerEmoji}>🎁</ThemedText>
-          <ThemedText type="subtitle">Coming soon</ThemedText>
+          <ThemedText type="subtitle">{t("redeemScan.comingSoon")}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={styles.bannerBody}>
-            Real perks for your points are on the way. You earn 1 point for every order.
+            {t("redeemScan.comingSoonBody")}
           </ThemedText>
         </ThemedView>
 
         <ThemedView style={styles.shiftEntry} type="backgroundElement">
-          <ThemedText type="smallBold">Log your shift</ThemedText>
+          <ThemedText type="smallBold">{t("redeemScan.logShift")}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
-            Add the number of orders you handled this shift to your points.
+            {t("redeemScan.logShiftBody")}
           </ThemedText>
           <TextField
-            label="Orders this shift"
+            label={t("redeemScan.ordersLabel")}
             value={shiftOrders}
             onChangeText={setShiftOrders}
             keyboardType="number-pad"
-            placeholder="e.g. 12"
+            placeholder={t("redeemScan.ordersPlaceholder")}
           />
           {shiftLogMessage ? <ThemedText type="small">{shiftLogMessage}</ThemedText> : null}
           <Button
-            title="Add points"
+            title={t("redeemScan.addPoints")}
             onPress={onLogShiftOrders}
             loading={loggingShift}
             disabled={!shiftOrders.trim() || parseInt(shiftOrders, 10) < 1}
@@ -81,20 +83,24 @@ export default function RedeemScan() {
         {next ? (
           <ThemedView style={styles.progressCard} type="backgroundElement">
             <ThemedText style={styles.progressEmoji}>{next.emoji}</ThemedText>
-            <ThemedText type="subtitle">{next.name} Award</ThemedText>
+            <ThemedText type="subtitle">{t("staffHome.award", { name: t(next.nameKey) })}</ThemedText>
             <ThemedView style={styles.progressTrack} type="backgroundElement">
               <ThemedView style={[styles.progressFill, { width: `${progressFraction * 100}%` }]} />
             </ThemedView>
             <ThemedText type="small" themeColor="textSecondary">
-              {points.toLocaleString()} / {next.threshold.toLocaleString()} orders · {(next.threshold - points).toLocaleString()} to go
+              {t("redeemScan.ordersProgress", {
+                points: points.toLocaleString(),
+                threshold: next.threshold.toLocaleString(),
+                remaining: (next.threshold - points).toLocaleString(),
+              })}
             </ThemedText>
           </ThemedView>
         ) : (
           <ThemedView style={styles.progressCard} type="backgroundElement">
             <ThemedText style={styles.progressEmoji}>🏆</ThemedText>
-            <ThemedText type="subtitle">Master Award achieved!</ThemedText>
+            <ThemedText type="subtitle">{t("redeemScan.masterAchieved")}</ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              You&apos;ve reached the highest award.
+              {t("redeemScan.reachedHighest")}
             </ThemedText>
           </ThemedView>
         )}
@@ -102,10 +108,10 @@ export default function RedeemScan() {
         {afterNext ? (
           <ThemedView style={styles.lockedCard} type="backgroundElement">
             <ThemedText style={styles.lockedEmoji}>{afterNext.emoji}</ThemedText>
-            <ThemedText type="subtitle">{afterNext.name} Award</ThemedText>
+            <ThemedText type="subtitle">{t("staffHome.award", { name: t(afterNext.nameKey) })}</ThemedText>
             <ThemedView style={styles.lockedBadge}>
               <ThemedText type="small" style={styles.lockedBadgeText}>
-                🔒 Coming soon
+                {t("redeemScan.lockedComingSoon")}
               </ThemedText>
             </ThemedView>
           </ThemedView>

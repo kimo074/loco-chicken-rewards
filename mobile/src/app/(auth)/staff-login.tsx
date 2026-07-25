@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
@@ -14,6 +15,7 @@ import { BrandTitleStyle } from "@/constants/theme";
 type StaffOption = { id: string; name: string };
 
 export default function StaffLogin() {
+  const { t } = useTranslation();
   const { loginAsStaff } = useAuth();
 
   const [accessGranted, setAccessGranted] = useState(false);
@@ -34,8 +36,8 @@ export default function StaffLogin() {
     if (!accessGranted) return;
     fetchLocations()
       .then((res) => setLocations(res.locations))
-      .catch(() => setError("Could not load locations. Is the server reachable?"));
-  }, [accessGranted]);
+      .catch(() => setError(t("staffLogin.couldNotLoadLocations")));
+  }, [accessGranted, t]);
 
   async function onSubmitAccessPin() {
     setAccessError(null);
@@ -44,7 +46,7 @@ export default function StaffLogin() {
       await verifyStaffAccessPin(accessPin);
       setAccessGranted(true);
     } catch (err) {
-      setAccessError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      setAccessError(err instanceof ApiError ? err.message : t("common.somethingWrong"));
     } finally {
       setAccessLoading(false);
     }
@@ -55,11 +57,11 @@ export default function StaffLogin() {
       <ThemedView style={styles.container}>
         <BrandBackdrop />
         <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
-          Staff access
+          {t("staffLogin.accessTitle")}
         </ThemedText>
-        <ThemedText themeColor="textSecondary">Enter the staff access PIN to continue.</ThemedText>
+        <ThemedText themeColor="textSecondary">{t("staffLogin.accessBody")}</ThemedText>
         <TextField
-          label="Access PIN"
+          label={t("staffLogin.accessPinLabel")}
           value={accessPin}
           onChangeText={setAccessPin}
           secureTextEntry
@@ -68,7 +70,7 @@ export default function StaffLogin() {
         />
         {accessError ? <ThemedText style={styles.error}>{accessError}</ThemedText> : null}
         <Button
-          title="Continue"
+          title={t("staffLogin.continueButton")}
           onPress={onSubmitAccessPin}
           loading={accessLoading}
           disabled={accessPin.length < 1}
@@ -84,7 +86,7 @@ export default function StaffLogin() {
       const res = await fetchStaffNames(location.id);
       setStaffOptions(res.staff);
     } catch {
-      setError("Could not load staff for this location.");
+      setError(t("staffLogin.couldNotLoadStaff"));
     }
   }
 
@@ -95,7 +97,7 @@ export default function StaffLogin() {
     try {
       await loginAsStaff({ staffUserId: selectedStaff.id, pin });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof ApiError ? err.message : t("common.somethingWrong"));
     } finally {
       setLoading(false);
     }
@@ -106,7 +108,7 @@ export default function StaffLogin() {
       <ThemedView style={styles.container}>
         <BrandBackdrop />
         <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
-          Select your location
+          {t("staffLogin.selectLocationTitle")}
         </ThemedText>
         <ThemedView style={styles.list}>
           {locations.map((location) => (
@@ -128,7 +130,7 @@ export default function StaffLogin() {
       <ThemedView style={styles.container}>
         <BrandBackdrop />
         <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
-          Who are you?
+          {t("staffLogin.whoAreYou")}
         </ThemedText>
         <ThemedText themeColor="textSecondary">{selectedLocation.name}</ThemedText>
         <ThemedView style={styles.list}>
@@ -136,7 +138,7 @@ export default function StaffLogin() {
             <Button key={staff.id} title={staff.name} variant="secondary" onPress={() => setSelectedStaff(staff)} />
           ))}
         </ThemedView>
-        <Button title="Back" variant="secondary" onPress={() => setSelectedLocation(null)} />
+        <Button title={t("common.back")} variant="secondary" onPress={() => setSelectedLocation(null)} />
         {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
       </ThemedView>
     );
@@ -146,11 +148,11 @@ export default function StaffLogin() {
     <ThemedView style={styles.container}>
       <BrandBackdrop />
       <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
-        Enter your PIN
+        {t("staffLogin.enterPinTitle")}
       </ThemedText>
       <ThemedText themeColor="textSecondary">{selectedStaff.name}</ThemedText>
       <TextField
-        label="PIN"
+        label={t("staffLogin.pinLabel")}
         value={pin}
         onChangeText={setPin}
         secureTextEntry
@@ -158,8 +160,8 @@ export default function StaffLogin() {
         maxLength={6}
       />
       {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
-      <Button title="Log in" onPress={onSubmitPin} loading={loading} disabled={pin.length < 4} />
-      <Button title="Back" variant="secondary" onPress={() => setSelectedStaff(null)} />
+      <Button title={t("staffLogin.logIn")} onPress={onSubmitPin} loading={loading} disabled={pin.length < 4} />
+      <Button title={t("common.back")} variant="secondary" onPress={() => setSelectedStaff(null)} />
     </ThemedView>
   );
 }

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Stack } from "expo-router";
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
@@ -5,13 +6,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ActivityIndicator } from "react-native";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemedView } from "@/components/themed-view";
+import { loadPersistedLanguage } from "@/i18n";
 
 const queryClient = new QueryClient();
 
 function RootNavigator() {
   const { session, isLoading } = useAuth();
+  const [languageReady, setLanguageReady] = useState(false);
 
-  if (isLoading) {
+  useEffect(() => {
+    loadPersistedLanguage().finally(() => setLanguageReady(true));
+  }, []);
+
+  if (isLoading || !languageReady) {
     return (
       <ThemedView style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator />

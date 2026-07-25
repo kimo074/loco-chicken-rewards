@@ -1,6 +1,7 @@
 import { createElement, useEffect, useRef, useState } from "react";
 import { StyleSheet, ViewStyle } from "react-native";
 import jsQR from "jsqr";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
@@ -28,6 +29,7 @@ const Video = (props: Record<string, unknown>) => createElement("video", props);
 const Canvas = (props: Record<string, unknown>) => createElement("canvas", props);
 
 export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScannerProps) {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -48,7 +50,7 @@ export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScanne
         // The video element is always mounted, so this should never happen —
         // but if it does, don't strand the user on a black screen.
         stream.getTracks().forEach((track) => track.stop());
-        throw new Error("Camera preview is not ready. Please try again.");
+        throw new Error(t("scan.cameraNotReady"));
       }
       // Set as real DOM properties, not just JSX attributes: React doesn't
       // always apply `muted` reliably on <video>, and Chrome silently blocks
@@ -60,7 +62,7 @@ export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScanne
         await video.play();
       } catch (playErr) {
         setState("error");
-        setErrorDetail(playErr instanceof Error ? playErr.message : "Could not start the camera preview.");
+        setErrorDetail(playErr instanceof Error ? playErr.message : t("scan.couldNotStartPreview"));
         return;
       }
       setState("granted");
@@ -110,10 +112,10 @@ export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScanne
 
   const message =
     state === "denied"
-      ? "Camera access was denied. Please allow camera access in your browser settings and try again."
+      ? t("scan.cameraDenied")
       : state === "error"
-        ? `Could not start the camera. ${errorDetail ?? "Please try again."}`
-        : "We use your camera to scan the code shown at the register.";
+        ? t("scan.couldNotStartCamera", { detail: errorDetail ?? t("scan.pleaseTryAgain") })
+        : t("scan.cameraPermissionBody");
 
   return (
     <ThemedView style={[styles.container, style]}>
@@ -125,7 +127,7 @@ export function WebBarcodeScanner({ active, onScanned, style }: WebBarcodeScanne
           <ThemedText themeColor="textSecondary" style={styles.permissionBody}>
             {message}
           </ThemedText>
-          <Button title="Grant camera access" onPress={requestAccess} />
+          <Button title={t("scan.grantAccess")} onPress={requestAccess} />
         </ThemedView>
       )}
     </ThemedView>

@@ -1,35 +1,40 @@
 import { Link } from "expo-router";
 import { StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
 import { LocoCoin } from "@/components/LocoCoin";
 import { BrandBackdrop } from "@/components/BrandBackdrop";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Welcome() {
+  const { t } = useTranslation();
+
   return (
     <ThemedView style={styles.container}>
       <BrandBackdrop />
+      <LanguageSwitcher style={styles.languageSwitcher} />
       <ThemedView style={styles.hero}>
         <ThemedView style={styles.badgeGlow}>
           <LocoCoin size={112} />
         </ThemedView>
-        <ThemedText style={styles.title}>Loco Chicken</ThemedText>
+        <ThemedText style={styles.title}>{t("welcome.appName")}</ThemedText>
         <ThemedView style={styles.titleRule} />
         <ThemedText type="subtitle" themeColor="textSecondary" style={styles.subtitle}>
-          Earn coins on every meal. Redeem them for free food.
+          {t("welcome.tagline")}
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.actions}>
         <Link href="/login" asChild>
-          <Button title="Log in" style={styles.primaryButton} />
+          <Button title={t("welcome.logIn")} style={styles.primaryButton} />
         </Link>
         <Link href="/signup" asChild>
-          <Button title="Create an account" variant="secondary" style={styles.glassButton} />
+          <Button title={t("welcome.createAccount")} variant="secondary" style={styles.glassButton} />
         </Link>
         <Link href="/staff-login" asChild>
-          <Button title="I work here" variant="secondary" style={styles.glassButton} />
+          <Button title={t("welcome.iWorkHere")} variant="secondary" style={styles.glassButton} />
         </Link>
       </ThemedView>
     </ThemedView>
@@ -43,6 +48,11 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 100,
     paddingBottom: 48,
+  },
+  languageSwitcher: {
+    position: "absolute",
+    top: 56,
+    right: 24,
   },
   hero: {
     gap: 10,

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import QRCode from "react-native-qrcode-svg";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
@@ -9,9 +10,10 @@ import { Button } from "@/components/Button";
 import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { GlossyButton } from "@/components/GlossyButton";
 import { useAuth } from "@/context/AuthContext";
-import { createSale, scanReceipt, SaleCode } from "@/api/sales";
+import { createSale, SaleCode } from "@/api/sales";
 import { ApiError } from "@/api/client";
 import { useCountdown } from "@/hooks/use-countdown";
+import { recognizeReceiptTotal } from "@/lib/receiptOcr";
 
 function eurosToCents(input: string): number | null {
   const normalized = input.replace(",", ".").trim();
@@ -21,6 +23,7 @@ function eurosToCents(input: string): number | null {
 }
 
 export default function NewSale() {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +39,7 @@ export default function NewSale() {
   async function onCreateSale() {
     const amountCents = eurosToCents(amount);
     if (!amountCents) {
-      setError("Enter a valid amount, e.g. 12.50");
+      setError(t("newSale.invalidAmount"));
       return;
     }
     setError(null);
@@ -45,7 +48,7 @@ export default function NewSale() {
       const created = await createSale(staffSession.token, amountCents);
       setSaleCode(created);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof ApiError ? err.message : t("common.somethingWrong"));
     } finally {
       setLoading(false);
     }
@@ -55,7 +58,7 @@ export default function NewSale() {
     setError(null);
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      setError("Camera access is needed to scan a receipt.");
+      setError(t("newSale.cameraPermission"));
       return;
     }
 
@@ -65,14 +68,14 @@ export default function NewSale() {
     setScanning(true);
     try {
       const mediaType = result.assets[0].mimeType === "image/png" ? "image/png" : "image/jpeg";
-      const { amountCents } = await scanReceipt(staffSession.token, result.assets[0].base64, mediaType);
+      const amountCents = await recognizeReceiptTotal(result.assets[0].base64, mediaType);
       if (amountCents) {
         setAmount((amountCents / 100).toFixed(2));
       } else {
-        setError("Couldn't read the amount from that receipt. Please enter it manually.");
+        setError(t("newSale.couldNotReadAmount"));
       }
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Couldn't scan the receipt. Please enter the amount manually.");
+    } catch {
+      setError(t("newSale.couldNotScan"));
     } finally {
       setScanning(false);
     }
@@ -91,13 +94,13 @@ export default function NewSale() {
         <ThemedView style={styles.qrCard}>
           {expired ? (
             <ThemedText type="subtitle" style={styles.expiredText}>
-              This code has expired
+              {t("rewards.codeExpired")}
             </ThemedText>
           ) : (
             <>
               <QRCode value={saleCode.token} size={220} />
               <ThemedText type="small" themeColor="textSecondary" style={styles.expiresIn}>
-                Expires in {countdownLabel}
+                {t("newSale.expiresIn", { time: countdownLabel })}
               </ThemedText>
             </>
           )}
@@ -105,10 +108,12 @@ export default function NewSale() {
 
         <ThemedView style={styles.summary}>
           <ThemedText type="subtitle">€{(saleCode.amountCents / 100).toFixed(2)}</ThemedText>
-          <ThemedText style={styles.mutedInk}>{saleCode.coinsAwarded} coins for the customer</ThemedText>
+          <ThemedText style={styles.mutedInk}>
+            {t("newSale.coinsForCustomer", { count: saleCode.coinsAwarded })}
+          </ThemedText>
         </ThemedView>
 
-        <Button title="Start another sale" onPress={onReset} />
+        <Button title={t("newSale.startAnother")} onPress={onReset} />
       </ThemedView>
     );
   }
@@ -117,14 +122,12 @@ export default function NewSale() {
     <ThemedView style={styles.container}>
       <BrandBackdrop />
       <ThemedText type="title" style={styles.title}>
-        New sale
+        {t("newSale.title")}
       </ThemedText>
-      <ThemedText style={styles.mutedInk}>
-        Enter the amount the customer paid. They'll scan the code to earn their coins.
-      </ThemedText>
+      <ThemedText style={styles.mutedInk}>{t("newSale.body")}</ThemedText>
 
       <TextField
-        label="Amount (€)"
+        label={t("newSale.amountLabel")}
         labelStyle={styles.mutedInk}
         style={styles.glassInput}
         value={amount}
@@ -132,9 +135,9 @@ export default function NewSale() {
         keyboardType="decimal-pad"
         placeholder="0.00"
       />
-      <GlossyButton title="Take a picture of the receipt" onPress={onScanReceipt} loading={scanning} />
+      <GlossyButton title={t("newSale.takePicture")} onPress={onScanReceipt} loading={scanning} />
       {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
-      <Button title="Generate code" onPress={onCreateSale} loading={loading} disabled={!amount} />
+      <Button title={t("newSale.generateCode")} onPress={onCreateSale} loading={loading} disabled={!amount} />
     </ThemedView>
   );
 }

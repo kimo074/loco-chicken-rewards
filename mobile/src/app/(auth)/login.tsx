@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "expo-router";
 import { StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
@@ -11,6 +12,7 @@ import { ApiError } from "@/api/client";
 import { BrandTitleStyle } from "@/constants/theme";
 
 export default function Login() {
+  const { t } = useTranslation();
   const { loginAsCustomer } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +25,7 @@ export default function Login() {
     try {
       await loginAsCustomer({ email: email.trim().toLowerCase(), password });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof ApiError ? err.message : t("common.somethingWrong"));
     } finally {
       setLoading(false);
     }
@@ -33,12 +35,12 @@ export default function Login() {
     <ThemedView style={styles.container}>
       <BrandBackdrop />
       <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
-        Log in
+        {t("login.title")}
       </ThemedText>
 
       <ThemedView style={styles.form}>
         <TextField
-          label="Email"
+          label={t("login.emailLabel")}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -46,7 +48,7 @@ export default function Login() {
           autoComplete="email"
         />
         <TextField
-          label="Password"
+          label={t("login.passwordLabel")}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -57,12 +59,12 @@ export default function Login() {
             {error}
           </ThemedText>
         ) : null}
-        <Button title="Log in" onPress={onSubmit} loading={loading} disabled={!email || !password} />
+        <Button title={t("login.submit")} onPress={onSubmit} loading={loading} disabled={!email || !password} />
       </ThemedView>
 
       <Link href="/signup">
         <ThemedText type="link" themeColor="textSecondary">
-          Don&apos;t have an account? Sign up
+          {t("login.noAccount")}
         </ThemedText>
       </Link>
     </ThemedView>

@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { Platform, StyleSheet } from "react-native";
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from "expo-camera";
+import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
@@ -13,6 +14,7 @@ import { ApiError } from "@/api/client";
 type ClaimState = { status: "idle" } | { status: "success"; coinsAwarded: number } | { status: "error"; message: string };
 
 export default function ScanToEarn() {
+  const { t } = useTranslation();
   const { session, refreshSession } = useAuth();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
@@ -30,11 +32,11 @@ export default function ScanToEarn() {
       } catch (err) {
         setClaimState({
           status: "error",
-          message: err instanceof ApiError ? err.message : "Something went wrong. Please try again.",
+          message: err instanceof ApiError ? err.message : t("common.somethingWrong"),
         });
       }
     },
-    [customerSession.token, refreshSession]
+    [customerSession.token, refreshSession, t]
   );
 
   async function onBarcodeScanned(result: BarcodeScanningResult) {
@@ -70,12 +72,10 @@ export default function ScanToEarn() {
       <ThemedView style={[styles.container, styles.centered]}>
         <BrandBackdrop />
         <ThemedText type="subtitle" style={styles.permissionTitle}>
-          Camera access needed
+          {t("scan.cameraPermissionTitle")}
         </ThemedText>
-        <ThemedText style={[styles.permissionBody, styles.mutedInk]}>
-          We use your camera to scan the code shown at the register so we can add your coins.
-        </ThemedText>
-        <Button title="Grant camera access" onPress={requestPermission} />
+        <ThemedText style={[styles.permissionBody, styles.mutedInk]}>{t("scan.cameraPermissionBody")}</ThemedText>
+        <Button title={t("scan.grantAccess")} onPress={requestPermission} />
       </ThemedView>
     );
   }
@@ -89,18 +89,18 @@ export default function ScanToEarn() {
             <ThemedText type="title" style={styles.resultEmoji}>
               🎉
             </ThemedText>
-            <ThemedText type="subtitle">+{claimState.coinsAwarded} coins</ThemedText>
-            <ThemedText style={styles.mutedInk}>Added to your balance</ThemedText>
+            <ThemedText type="subtitle">{t("scan.coinsAwarded", { count: claimState.coinsAwarded })}</ThemedText>
+            <ThemedText style={styles.mutedInk}>{t("scan.addedToBalance")}</ThemedText>
           </>
         ) : (
           <>
             <ThemedText type="subtitle" style={styles.errorTitle}>
-              Couldn&apos;t add coins
+              {t("scan.couldNotAddCoins")}
             </ThemedText>
             <ThemedText style={[styles.permissionBody, styles.mutedInk]}>{claimState.message}</ThemedText>
           </>
         )}
-        <Button title="Scan again" onPress={onScanAgain} />
+        <Button title={t("scan.scanAgain")} onPress={onScanAgain} />
       </ThemedView>
     );
   }
@@ -117,7 +117,7 @@ export default function ScanToEarn() {
         />
       )}
       <ThemedView style={styles.hint}>
-        <ThemedText themeColor="textSecondary">Point your camera at the code on the register</ThemedText>
+        <ThemedText themeColor="textSecondary">{t("scan.pointCamera")}</ThemedText>
       </ThemedView>
     </ThemedView>
   );
