@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/Button";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/context/AuthContext";
 import { getStaffTierProgress } from "@/lib/staffTiers";
@@ -17,14 +18,15 @@ export default function StaffHome() {
 
   return (
     <ThemedView style={styles.container}>
+      <BrandBackdrop />
       <LanguageSwitcher style={styles.languageSwitcher} />
-      <ThemedText type="small" themeColor="textSecondary">
+      <ThemedText type="small" themeColor="textOnBrand" style={styles.mutedText}>
         {t("staffHome.signedInAs")}
       </ThemedText>
-      <ThemedText type="title" style={styles.name}>
+      <ThemedText type="title" style={[styles.name, styles.mutedText]}>
         {session.staff.name}
       </ThemedText>
-      <ThemedText themeColor="textSecondary">{session.staff.locationName}</ThemedText>
+      <ThemedText themeColor="textOnBrand" style={styles.mutedText}>{session.staff.locationName}</ThemedText>
 
       <ThemedView style={styles.pointsCard} type="backgroundElement">
         <ThemedText type="small" themeColor="textSecondary">
@@ -79,6 +81,9 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 32,
+  },
+  mutedText: {
+    color: "#3A1218",
   },
   pointsCard: {
     borderRadius: 16,

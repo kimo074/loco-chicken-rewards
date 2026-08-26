@@ -121,7 +121,7 @@ export default function NewSale() {
   return (
     <ThemedView style={styles.container}>
       <BrandBackdrop />
-      <ThemedText type="title" style={styles.title}>
+      <ThemedText type="title" style={[styles.title, styles.mutedInk]}>
         {t("newSale.title")}
       </ThemedText>
       <ThemedText style={styles.mutedInk}>{t("newSale.body")}</ThemedText>
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     color: "#3A1218",
   },
   glassInput: {
-    backgroundColor: "rgba(36, 28, 21, 0.62)",
+    backgroundColor: "rgba(26, 18, 16, 0.9)",
     borderColor: "rgba(255, 255, 255, 0.16)",
   },
   error: {
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 16,
     minHeight: 280,
-    backgroundColor: "rgba(36, 28, 21, 0.62)",
+    backgroundColor: "rgba(26, 18, 16, 0.9)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.16)",
   },

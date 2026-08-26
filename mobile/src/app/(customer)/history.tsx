@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "rgba(36, 28, 21, 0.62)",
+    backgroundColor: "rgba(26, 18, 16, 0.9)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.16)",
   },
@@ -156,9 +156,9 @@ const styles = StyleSheet.create({
     color: "#4A1B22",
   },
   glassButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    backgroundColor: "rgba(26, 18, 16, 0.9)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.35)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   positive: {
     color: "#3FA34D",

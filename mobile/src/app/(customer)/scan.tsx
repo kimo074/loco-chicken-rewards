@@ -71,7 +71,7 @@ export default function ScanToEarn() {
     return (
       <ThemedView style={[styles.container, styles.centered]}>
         <BrandBackdrop />
-        <ThemedText type="subtitle" style={styles.permissionTitle}>
+        <ThemedText type="subtitle" style={[styles.permissionTitle, styles.resultTitle]}>
           {t("scan.cameraPermissionTitle")}
         </ThemedText>
         <ThemedText style={[styles.permissionBody, styles.mutedInk]}>{t("scan.cameraPermissionBody")}</ThemedText>
@@ -89,7 +89,7 @@ export default function ScanToEarn() {
             <ThemedText type="title" style={styles.resultEmoji}>
               🎉
             </ThemedText>
-            <ThemedText type="subtitle">{t("scan.coinsAwarded", { count: claimState.coinsAwarded })}</ThemedText>
+            <ThemedText type="subtitle" style={styles.resultTitle}>{t("scan.coinsAwarded", { count: claimState.coinsAwarded })}</ThemedText>
             <ThemedText style={styles.mutedInk}>{t("scan.addedToBalance")}</ThemedText>
           </>
         ) : (
@@ -152,6 +152,9 @@ const styles = StyleSheet.create({
   },
   resultEmoji: {
     fontSize: 56,
+  },
+  resultTitle: {
+    color: "#3A1218",
   },
   errorTitle: {
     color: "#C4392B",

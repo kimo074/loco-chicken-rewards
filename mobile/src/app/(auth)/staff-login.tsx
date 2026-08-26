@@ -59,9 +59,10 @@ export default function StaffLogin() {
         <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
           {t("staffLogin.accessTitle")}
         </ThemedText>
-        <ThemedText themeColor="textSecondary">{t("staffLogin.accessBody")}</ThemedText>
+        <ThemedText themeColor="textOnBrand" style={styles.bodyText}>{t("staffLogin.accessBody")}</ThemedText>
         <TextField
           label={t("staffLogin.accessPinLabel")}
+          labelStyle={styles.fieldLabel}
           value={accessPin}
           onChangeText={setAccessPin}
           secureTextEntry
@@ -132,7 +133,7 @@ export default function StaffLogin() {
         <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
           {t("staffLogin.whoAreYou")}
         </ThemedText>
-        <ThemedText themeColor="textSecondary">{selectedLocation.name}</ThemedText>
+        <ThemedText themeColor="textOnBrand" style={styles.bodyText}>{selectedLocation.name}</ThemedText>
         <ThemedView style={styles.list}>
           {staffOptions.map((staff) => (
             <Button key={staff.id} title={staff.name} variant="secondary" onPress={() => setSelectedStaff(staff)} />
@@ -150,9 +151,10 @@ export default function StaffLogin() {
       <ThemedText type="title" style={[styles.title, BrandTitleStyle]}>
         {t("staffLogin.enterPinTitle")}
       </ThemedText>
-      <ThemedText themeColor="textSecondary">{selectedStaff.name}</ThemedText>
+      <ThemedText themeColor="textOnBrand" style={styles.bodyText}>{selectedStaff.name}</ThemedText>
       <TextField
         label={t("staffLogin.pinLabel")}
+        labelStyle={styles.fieldLabel}
         value={pin}
         onChangeText={setPin}
         secureTextEntry
@@ -182,5 +184,12 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "#C4392B",
+  },
+  bodyText: {
+    fontWeight: "600",
+  },
+  fieldLabel: {
+    color: "#3A1218",
+    fontWeight: "700",
   },
 });

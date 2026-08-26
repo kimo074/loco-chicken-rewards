@@ -5,6 +5,7 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/TextField";
 import { Button } from "@/components/Button";
+import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { useAuth } from "@/context/AuthContext";
 import { logShiftOrders } from "@/api/me";
 import { ApiError } from "@/api/client";
@@ -46,8 +47,9 @@ export default function RedeemScan() {
 
   return (
     <ThemedView style={styles.container}>
+      <BrandBackdrop />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ThemedText type="title" style={styles.title}>
+        <ThemedText type="title" style={[styles.title, styles.mutedInk]}>
           {t("redeemScan.title")}
         </ThemedText>
 
@@ -133,6 +135,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     marginBottom: 4,
+  },
+  mutedInk: {
+    color: "#3A1218",
   },
   comingSoonBanner: {
     borderRadius: 16,

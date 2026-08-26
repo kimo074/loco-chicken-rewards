@@ -33,7 +33,7 @@ export function LanguageSwitcher({ style }: { style?: object }) {
 const styles = StyleSheet.create({
   pill: {
     flexDirection: "row",
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
+    backgroundColor: "rgba(26, 18, 16, 0.92)",
     borderRadius: 999,
     padding: 3,
     borderWidth: 1,
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     fontWeight: "700",
-    color: "rgba(255, 255, 255, 0.65)",
+    color: "rgba(255, 255, 255, 0.7)",
   },
   labelActive: {
     color: "#FFFFFF",

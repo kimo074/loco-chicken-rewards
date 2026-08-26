@@ -105,8 +105,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.25)",
   },
   glassButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    backgroundColor: "rgba(26, 18, 16, 0.9)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.35)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
 });

@@ -14,6 +14,7 @@ export const Colors = {
     backgroundElement: '#F0F0F3',
     backgroundSelected: '#E0E1E6',
     textSecondary: '#60646C',
+    textOnBrand: '#3A1218',
   },
   dark: {
     text: '#ffffff',
@@ -21,6 +22,7 @@ export const Colors = {
     backgroundElement: '#241C15',
     backgroundSelected: '#2F2318',
     textSecondary: '#B0B4BA',
+    textOnBrand: '#3A1218',
   },
 } as const;
 
@@ -29,7 +31,7 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 export const Brand = {
   red: '#D6241F',
   redDark: '#A81B18',
-  yellow: '#F6B90D',
+  yellow: '#FFD400',
   black: '#1A1A1A',
 } as const;
 

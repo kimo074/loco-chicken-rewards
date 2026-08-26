@@ -40,9 +40,16 @@ export default function Signup() {
       </ThemedText>
 
       <ThemedView style={styles.form}>
-        <TextField label={t("signup.nameLabel")} value={name} onChangeText={setName} autoComplete="name" />
+        <TextField
+          label={t("signup.nameLabel")}
+          labelStyle={styles.fieldLabel}
+          value={name}
+          onChangeText={setName}
+          autoComplete="name"
+        />
         <TextField
           label={t("signup.emailLabel")}
+          labelStyle={styles.fieldLabel}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -51,6 +58,7 @@ export default function Signup() {
         />
         <TextField
           label={t("signup.passwordLabel")}
+          labelStyle={styles.fieldLabel}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -67,13 +75,13 @@ export default function Signup() {
           loading={loading}
           disabled={!name || !email || password.length < 8}
         />
-        <ThemedText type="small" themeColor="textSecondary">
+        <ThemedText type="small" themeColor="textOnBrand" style={styles.hintText}>
           {t("signup.passwordHint")}
         </ThemedText>
       </ThemedView>
 
       <Link href="/login">
-        <ThemedText type="link" themeColor="textSecondary">
+        <ThemedText type="link" themeColor="textOnBrand" style={styles.linkText}>
           {t("signup.haveAccount")}
         </ThemedText>
       </Link>
@@ -97,5 +105,15 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "#C4392B",
+  },
+  fieldLabel: {
+    color: "#3A1218",
+    fontWeight: "700",
+  },
+  hintText: {
+    fontWeight: "600",
+  },
+  linkText: {
+    fontWeight: "700",
   },
 });

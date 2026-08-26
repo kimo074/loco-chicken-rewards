@@ -55,7 +55,7 @@ export default function CustomerHome() {
           {t(greetingKey()).toUpperCase()}
         </ThemedText>
       </ThemedView>
-      <ThemedText type="title" style={styles.name}>
+      <ThemedText type="title" style={[styles.name, styles.nameColor]}>
         {session.customer.name} 👋
       </ThemedText>
       <ThemedText type="small" style={[styles.note, styles.noteBold]}>
@@ -112,6 +112,9 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 32,
   },
+  nameColor: {
+    color: "#3A1218",
+  },
   greetingRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(36, 28, 21, 0.62)",
+    backgroundColor: "rgba(26, 18, 16, 0.9)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.16)",
     shadowColor: "#D6241F",

@@ -41,6 +41,7 @@ export default function Login() {
       <ThemedView style={styles.form}>
         <TextField
           label={t("login.emailLabel")}
+          labelStyle={styles.fieldLabel}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -49,6 +50,7 @@ export default function Login() {
         />
         <TextField
           label={t("login.passwordLabel")}
+          labelStyle={styles.fieldLabel}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -63,7 +65,7 @@ export default function Login() {
       </ThemedView>
 
       <Link href="/signup">
-        <ThemedText type="link" themeColor="textSecondary">
+        <ThemedText type="link" themeColor="textOnBrand" style={styles.linkText}>
           {t("login.noAccount")}
         </ThemedText>
       </Link>
@@ -87,5 +89,12 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "#C4392B",
+  },
+  fieldLabel: {
+    color: "#3A1218",
+    fontWeight: "700",
+  },
+  linkText: {
+    fontWeight: "700",
   },
 });
