@@ -21,6 +21,10 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
+app.get("/", (_req, res) => {
+  res.redirect("/admin");
+});
+
 app.get("/admin", (_req, res) => {
   res.sendFile(path.join(__dirname, "../public/admin.html"));
 });

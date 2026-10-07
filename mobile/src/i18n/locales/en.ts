@@ -89,6 +89,10 @@ export const en = {
     cameraDenied: "Camera access was denied. Please allow camera access in your browser settings and try again.",
     couldNotStartCamera: "Could not start the camera. {{detail}}",
     pleaseTryAgain: "Please try again.",
+    takePhoto: "📷 Take a photo of the code",
+    noCodeInPhoto: "No QR code found in that photo. Move a bit closer and try again.",
+    flashOn: "Flash on",
+    flashOff: "Flash off",
   },
   history: {
     title: "Activity",

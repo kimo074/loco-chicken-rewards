@@ -98,7 +98,7 @@ export default function NewSale() {
             </ThemedText>
           ) : (
             <>
-              <QRCode value={saleCode.token} size={220} />
+              <QRCode value={saleCode.token} size={240} quietZone={16} ecl="M" />
               <ThemedText type="small" themeColor="textSecondary" style={styles.expiresIn}>
                 {t("newSale.expiresIn", { time: countdownLabel })}
               </ThemedText>

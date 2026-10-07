@@ -89,6 +89,10 @@ export const de = {
     cameraDenied: "Kamerazugriff wurde verweigert. Bitte erlaube den Kamerazugriff in deinen Browsereinstellungen und versuch es erneut.",
     couldNotStartCamera: "Kamera konnte nicht gestartet werden. {{detail}}",
     pleaseTryAgain: "Bitte versuch es erneut.",
+    takePhoto: "📷 Foto vom Code machen",
+    noCodeInPhoto: "Kein QR-Code auf dem Foto gefunden. Geh etwas näher ran und versuch es erneut.",
+    flashOn: "Licht an",
+    flashOff: "Licht aus",
   },
   history: {
     title: "Verlauf",
