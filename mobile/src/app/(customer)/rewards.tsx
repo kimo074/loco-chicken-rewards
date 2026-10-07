@@ -80,7 +80,7 @@ export default function Rewards() {
             </ThemedText>
           ) : (
             <>
-              <QRCode value={activeRedemption.token} size={200} />
+              <QRCode value={activeRedemption.token} size={220} quietZone={16} ecl="M" />
               <ThemedText type="title" style={styles.shortCode}>
                 {activeRedemption.shortCode}
               </ThemedText>
