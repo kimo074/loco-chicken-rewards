@@ -198,6 +198,7 @@
   }
   .pill.active { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
   .pill.inactive { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
+  .pill.pending { background: color-mix(in srgb, var(--text-secondary) 16%, transparent); color: var(--text-secondary); }
   .btn {
     border: 1px solid var(--border);
     background: var(--mono-bg);
@@ -407,6 +408,7 @@
                   <th>Revenue</th>
                   <th>Shift-logged</th>
                   <th>Customer-scanned</th>
+                  <th>Rewards given</th>
                   <th>Points</th>
                   <th>Award</th>
                 </tr>
@@ -433,6 +435,26 @@
         </table>
       </div>
       <div class="empty" id="location-performance-empty" style="display:none">No locations yet.</div>
+
+      <h2 style="margin-top:20px;">Reward Redemptions</h2>
+      <div id="redemption-counts" style="color:var(--text-secondary); font-size:13px; margin-bottom:8px;"></div>
+      <div class="table-wrap">
+        <table id="redemptions-table">
+          <thead>
+            <tr>
+              <th>Redeemed</th>
+              <th>Reward</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Collected</th>
+              <th>Location</th>
+              <th>Staff</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="redemptions-empty" style="display:none">No rewards redeemed yet.</div>
     </section>
 
     <section>
@@ -597,6 +619,7 @@
     app.classList.toggle("limited", level === "limited");
     levelBadge.textContent = level === "limited" ? "Limited access" : "Full access";
     loadAnalytics();
+    loadRedemptions();
     loadLocations();
     loadCustomers();
     loadStaff();
@@ -739,12 +762,59 @@
           <td class="balance">${formatCents(s.totalAmountCents)}</td>
           <td class="balance">${s.manualOrdersLogged}</td>
           <td class="balance">${s.customerScannedOrders}</td>
+          <td class="balance">${s.redemptionsFulfilled ?? 0}</td>
           <td class="balance">${s.points}</td>
           <td class="balance">${staffTierLabel(s.points)}</td>
         </tr>
       `;
         }
       )
+      .join("");
+  }
+
+  async function loadRedemptions() {
+    try {
+      renderRedemptions(await apiFetch("/api/admin/redemptions"));
+    } catch (err) {
+      if (err.message !== "Session expired") alert("Could not load redemptions: " + err.message);
+    }
+  }
+
+  function formatDateTime(iso) {
+    return new Date(iso).toLocaleString("en-GB", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function renderRedemptions(data) {
+    const pills = {
+      FULFILLED: { cls: "active", label: "Collected" },
+      PENDING: { cls: "pending", label: "Waiting" },
+      EXPIRED: { cls: "inactive", label: "Expired" },
+    };
+    const tbody = document.querySelector("#redemptions-table tbody");
+    const empty = document.getElementById("redemptions-empty");
+    document.getElementById("redemption-counts").textContent =
+      `${data.counts.fulfilled} collected · ${data.counts.pending} waiting · ${data.counts.expired} expired (coins refunded)`;
+    empty.style.display = data.redemptions.length === 0 ? "block" : "none";
+    tbody.innerHTML = data.redemptions
+      .map((r) => {
+        const pill = pills[r.status] || pills.PENDING;
+        return `
+        <tr>
+          <td>${formatDateTime(r.createdAt)}</td>
+          <td>${escapeHtml(r.rewardName)}</td>
+          <td>${escapeHtml(r.customerName)}</td>
+          <td><span class="pill ${pill.cls}">${pill.label}</span></td>
+          <td>${r.fulfilledAt ? formatDateTime(r.fulfilledAt) : "—"}</td>
+          <td>${r.locationName ? escapeHtml(r.locationName) : "—"}</td>
+          <td>${r.staffName ? escapeHtml(r.staffName) : "—"}</td>
+        </tr>
+      `;
+      })
       .join("");
   }
 

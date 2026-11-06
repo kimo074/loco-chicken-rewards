@@ -68,6 +68,54 @@ adminRouter.get(
   })
 );
 
+// Reward redemptions for the dashboard: who redeemed what, whether it was handed over,
+// and which staff member / location handed it over. The redemption token and short code
+// are deliberately not exposed here.
+adminRouter.get(
+  "/redemptions",
+  requireAdmin,
+  asyncHandler(async (_req, res) => {
+    const [rows, grouped] = await Promise.all([
+      prisma.redemption.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        select: {
+          id: true,
+          status: true,
+          costCoins: true,
+          createdAt: true,
+          fulfilledAt: true,
+          customer: { select: { name: true } },
+          reward: { select: { name: true } },
+          fulfilledByStaff: { select: { name: true } },
+          fulfilledAtLocation: { select: { name: true } },
+        },
+      }),
+      prisma.redemption.groupBy({ by: ["status"], _count: { _all: true } }),
+    ]);
+
+    const counts = { pending: 0, fulfilled: 0, expired: 0 };
+    for (const group of grouped) {
+      counts[group.status.toLowerCase() as keyof typeof counts] = group._count._all;
+    }
+
+    res.json({
+      counts,
+      redemptions: rows.map((row) => ({
+        id: row.id,
+        status: row.status,
+        costCoins: row.costCoins,
+        createdAt: row.createdAt,
+        fulfilledAt: row.fulfilledAt,
+        rewardName: row.reward.name,
+        customerName: row.customer.name,
+        staffName: row.fulfilledByStaff?.name ?? null,
+        locationName: row.fulfilledAtLocation?.name ?? null,
+      })),
+    });
+  })
+);
+
 const createCustomerSchema = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email(),

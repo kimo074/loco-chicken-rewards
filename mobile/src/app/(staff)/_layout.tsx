@@ -31,6 +31,13 @@ export default function StaffLayout() {
         }}
       />
       <Tabs.Screen
+        name="redeem"
+        options={{
+          title: t("staffTabs.redeem"),
+          tabBarIcon: ({ color, size }) => <Ionicons name="qr-code" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="redeem-scan"
         options={{
           title: t("staffTabs.rewards"),

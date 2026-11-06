@@ -63,11 +63,25 @@ meRouter.get(
   asyncHandler(async (req, res) => {
     if (req.auth?.role !== "CUSTOMER") throw new HttpError(403, "Customer access required");
 
+    // Redemption details ride along so the customer's activity can show whether each
+    // reward was collected, is still waiting, or expired. The redemption token/code is
+    // deliberately not selected.
     const transactions = await prisma.coinTransaction.findMany({
       where: { customerId: req.auth.customerId },
       orderBy: { createdAt: "desc" },
       take: 100,
+      include: {
+        relatedRedemption: {
+          select: {
+            status: true,
+            fulfilledAt: true,
+            reward: { select: { name: true } },
+            fulfilledAtLocation: { select: { name: true } },
+          },
+        },
+      },
     });
+
     res.json({ transactions });
   })
 );

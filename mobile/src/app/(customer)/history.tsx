@@ -1,4 +1,6 @@
+import { useCallback } from "react";
 import { FlatList, RefreshControl, StyleSheet } from "react-native";
+import { useFocusEffect } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
@@ -44,6 +46,26 @@ export default function History() {
     enabled: session?.role === "CUSTOMER",
   });
 
+  // Tabs stay mounted, so refresh whenever this one comes back into view; that is how a
+  // reward flips from "waiting" to "collected" after staff scan it.
+  useFocusEffect(
+    useCallback(() => {
+      if (session?.role === "CUSTOMER") refetch();
+    }, [session?.role, refetch])
+  );
+
+  function redemptionLine(item: CoinTransaction): string | null {
+    const redemption = item.relatedRedemption;
+    if (!redemption) return null;
+    const reward = redemption.reward.name;
+    if (redemption.status === "FULFILLED") {
+      const place = redemption.fulfilledAtLocation?.name;
+      return place ? t("history.collectedAt", { reward, place }) : t("history.collected", { reward });
+    }
+    if (redemption.status === "PENDING") return t("history.waiting", { reward });
+    return t("history.notCollected", { reward });
+  }
+
   if (session?.role !== "CUSTOMER") return null;
 
   return (
@@ -83,6 +105,11 @@ export default function History() {
                 <ThemedText type="small" themeColor="textSecondary">
                   {formatDate(item.createdAt, i18n.language)}
                 </ThemedText>
+                {redemptionLine(item) ? (
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {redemptionLine(item)}
+                  </ThemedText>
+                ) : null}
               </ThemedView>
               <ThemedText
                 type="smallBold"

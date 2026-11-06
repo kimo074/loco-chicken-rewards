@@ -31,6 +31,12 @@ export type CoinTransaction = {
   type: "EARN" | "REDEEM" | "ADJUSTMENT";
   amount: number;
   createdAt: string;
+  relatedRedemption?: {
+    status: "PENDING" | "FULFILLED" | "EXPIRED";
+    fulfilledAt: string | null;
+    reward: { name: string };
+    fulfilledAtLocation: { name: string } | null;
+  } | null;
 };
 
 export type Redemption = {

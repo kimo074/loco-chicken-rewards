@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useAudioPlayer } from "expo-audio";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
@@ -13,6 +13,7 @@ import { ConfettiBurst } from "@/components/ConfettiBurst";
 import { BrandBackdrop } from "@/components/BrandBackdrop";
 import { useAuth } from "@/context/AuthContext";
 import { fetchRewards } from "@/api/rewards";
+import { fetchMyRedemptions } from "@/api/me";
 import { createRedemption, RedemptionResult } from "@/api/redemptions";
 import { ApiError } from "@/api/client";
 import { Reward } from "@/api/types";
@@ -37,6 +38,26 @@ export default function Rewards() {
 
   const { label: countdownLabel, expired } = useCountdown(activeRedemption?.expiresAt ?? null);
 
+  const queryClient = useQueryClient();
+  const customerToken = session?.role === "CUSTOMER" ? session.token : null;
+  const redemptionToken = activeRedemption?.token ?? null;
+
+  // While the QR is on screen, check every few seconds whether staff have scanned it.
+  // Polling stops once the redemption is no longer pending.
+  const { data: myRedemptions } = useQuery({
+    queryKey: ["my-redemptions"],
+    queryFn: () =>
+      customerToken ? fetchMyRedemptions(customerToken).then((res) => res.redemptions) : Promise.resolve([]),
+    enabled: redemptionToken !== null && customerToken !== null,
+    refetchInterval: (query) =>
+      query.state.data?.some((r) => r.token === redemptionToken && r.status !== "PENDING") ? false : 4000,
+  });
+  const collected = myRedemptions?.some((r) => r.token === redemptionToken && r.status === "FULFILLED") ?? false;
+
+  useEffect(() => {
+    if (collected) queryClient.invalidateQueries({ queryKey: ["transactions"] });
+  }, [collected, queryClient]);
+
   if (session?.role !== "CUSTOMER") return null;
   const customerSession = session;
 
@@ -59,6 +80,7 @@ export default function Rewards() {
       setActiveRedemption(result);
       setPendingReward(null);
       setConfettiKey((key) => key + 1);
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
       await refreshSession();
     } catch (err) {
       setRedeemError(err instanceof ApiError ? err.message : t("common.somethingWrong"));
@@ -74,7 +96,19 @@ export default function Rewards() {
         <BrandBackdrop />
         <ThemedView style={styles.qrCard}>
           <ConfettiBurst burstKey={confettiKey} />
-          {expired ? (
+          {collected ? (
+            <>
+              <ThemedText type="title" style={styles.collectedEmoji}>
+                ✅
+              </ThemedText>
+              <ThemedText type="subtitle" style={styles.mutedInk}>
+                {t("rewards.collected")}
+              </ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {t("rewards.collectedBody")}
+              </ThemedText>
+            </>
+          ) : expired ? (
             <ThemedText type="subtitle" style={styles.expiredText}>
               {t("rewards.codeExpired")}
             </ThemedText>
@@ -173,6 +207,9 @@ export default function Rewards() {
 }
 
 const styles = StyleSheet.create({
+  collectedEmoji: {
+    fontSize: 56,
+  },
   container: {
     flex: 1,
     padding: 24,
